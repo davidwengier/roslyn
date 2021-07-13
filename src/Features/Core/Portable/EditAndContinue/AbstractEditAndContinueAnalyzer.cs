@@ -29,6 +29,8 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
     {
         internal const int DefaultStatementPart = 0;
 
+        private static readonly IEqualityComparer<SymbolKey> s_symbolKeyComparer = SymbolKey.GetComparer();
+
         /// <summary>
         /// Contains enough information to determine whether two symbols have the same signature.
         /// </summary>
@@ -3165,7 +3167,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                 staticConstructorEdits?.Free();
             }
 
-            return semanticEdits.Distinct(SemanticEditInfoComparer.Instance).ToImmutableArray();
+            return MergeSemanticEdits(semanticEdits);
 
             // If the symbol has a single declaring reference use its syntax node for further analysis.
             // Some syntax edits may not be directly associated with the declarations.
@@ -3179,19 +3181,36 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                     (newSymbol != null && newSymbol.DeclaringSyntaxReferences.Length == 1) ?
                         GetSymbolDeclarationSyntax(newSymbol.DeclaringSyntaxReferences.Single(), cancellationToken) : newNode);
             }
-        }
 
-        private sealed class SemanticEditInfoComparer : IEqualityComparer<SemanticEditInfo>
-        {
-            public static SemanticEditInfoComparer Instance = new();
+            // We want to report only one edit per symbol, but if multiple edits were added they might have
+            // different SemanticEditOptions so we want to combine all of them together.
+            static ImmutableArray<SemanticEditInfo> MergeSemanticEdits(ArrayBuilder<SemanticEditInfo> semanticEdits)
+            {
+                using var _ = ArrayBuilder<SemanticEditInfo>.GetInstance(out var edits);
+                var groupedEdits = semanticEdits.GroupBy(s => s.Symbol, s_symbolKeyComparer);
 
-            private static readonly IEqualityComparer<SymbolKey> s_symbolKeyComparer = SymbolKey.GetComparer();
+                foreach (var edit in groupedEdits)
+                {
+                    Func<SyntaxNode, SyntaxNode?>? syntaxMap = null;
+                    SyntaxTree? syntaxMapTree = null;
+                    SymbolKey? partialType = null;
+                    var editOptions = SemanticEditOption.None;
+                    foreach (var info in edit)
+                    {
+                        // For most things we just want to take the first non-null value
+                        syntaxMap ??= info.SyntaxMap;
+                        syntaxMapTree ??= info.SyntaxMapTree;
+                        partialType??= info.PartialType;
 
-            public bool Equals([AllowNull] SemanticEditInfo x, [AllowNull] SemanticEditInfo y)
-                => s_symbolKeyComparer.Equals(x.Symbol, y.Symbol);
+                        // For edit options we OR everything together
+                        editOptions |= info.Options;
+                    }
 
-            public int GetHashCode([DisallowNull] SemanticEditInfo obj)
-                => obj.Symbol.GetHashCode();
+                    edits.Add(new SemanticEditInfo(edit.First().Kind, edit.Key, syntaxMap, syntaxMapTree, partialType, editOptions));
+                }
+
+                return edits.ToImmutable();
+            }
         }
 
         private void ReportUpdatedSymbolDeclarationRudeEdits(
