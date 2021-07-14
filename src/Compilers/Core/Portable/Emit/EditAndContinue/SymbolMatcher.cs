@@ -47,6 +47,7 @@ namespace Microsoft.CodeAnalysis.Emit
                 eventsAdded,
                 fieldsAdded,
                 methodsAdded,
+                paramsAdded: baseline.ParamsAdded,
                 propertiesAdded,
                 eventMapAdded: baseline.EventMapAdded,
                 propertyMapAdded: baseline.PropertyMapAdded,

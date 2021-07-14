@@ -187,6 +187,7 @@ namespace Microsoft.CodeAnalysis.Emit
                 eventsAdded: AddRange(_previousGeneration.EventsAdded, _eventDefs.GetAdded(), comparer: Cci.SymbolEquivalentEqualityComparer.Instance),
                 fieldsAdded: AddRange(_previousGeneration.FieldsAdded, _fieldDefs.GetAdded(), comparer: Cci.SymbolEquivalentEqualityComparer.Instance),
                 methodsAdded: AddRange(_previousGeneration.MethodsAdded, _methodDefs.GetAdded(), comparer: Cci.SymbolEquivalentEqualityComparer.Instance),
+                paramsAdded: AddRange(_previousGeneration.ParamsAdded, _parameterDefs.GetAdded(), comparer: Cci.SymbolEquivalentEqualityComparer.Instance),
                 propertiesAdded: AddRange(_previousGeneration.PropertiesAdded, _propertyDefs.GetAdded(), comparer: Cci.SymbolEquivalentEqualityComparer.Instance),
                 eventMapAdded: AddRange(_previousGeneration.EventMapAdded, _eventMap.GetAdded()),
                 propertyMapAdded: AddRange(_previousGeneration.PropertyMapAdded, _propertyMap.GetAdded()),
@@ -541,6 +542,10 @@ namespace Microsoft.CodeAnalysis.Emit
                     {
                         EmitParametersFromOriginalMetadata(methodDef, handle);
                     }
+                    else
+                    {
+                        EmitParametersFromDelta(methodDef);
+                    }
                 }
 
                 if (added)
@@ -623,6 +628,18 @@ namespace Microsoft.CodeAnalysis.Emit
                 _parameterDefs.Add(paramDef, MetadataTokens.GetRowNumber(param));
                 _parameterDefList.Add(paramDef, methodDef);
                 i++;
+            }
+        }
+
+        private void EmitParametersFromDelta(IMethodDefinition methodDef)
+        {
+            foreach (var paramDef in GetParametersToEmit(methodDef))
+            {
+                if (_previousGeneration.ParamsAdded.TryGetValue(paramDef, out var rowId))
+                {
+                    _parameterDefs.Add(paramDef, rowId);
+                    _parameterDefList.Add(paramDef, methodDef);
+                }
             }
         }
 
