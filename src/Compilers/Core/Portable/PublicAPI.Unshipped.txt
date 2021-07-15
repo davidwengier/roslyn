@@ -6,6 +6,9 @@ Microsoft.CodeAnalysis.Emit.EmitDifferenceResult.UpdatedMethods.get -> System.Co
 Microsoft.CodeAnalysis.Emit.EmitDifferenceResult.UpdatedTypes.get -> System.Collections.Immutable.ImmutableArray<System.Reflection.Metadata.TypeDefinitionHandle>
 Microsoft.CodeAnalysis.Emit.SemanticEdit.Options.get -> Microsoft.CodeAnalysis.Emit.SemanticEditOption
 Microsoft.CodeAnalysis.Emit.SemanticEdit.SemanticEdit(Microsoft.CodeAnalysis.Emit.SemanticEditKind kind, Microsoft.CodeAnalysis.ISymbol? oldSymbol, Microsoft.CodeAnalysis.ISymbol? newSymbol, System.Func<Microsoft.CodeAnalysis.SyntaxNode!, Microsoft.CodeAnalysis.SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false, Microsoft.CodeAnalysis.Emit.SemanticEditOption options = Microsoft.CodeAnalysis.Emit.SemanticEditOption.None) -> void
+Microsoft.CodeAnalysis.Emit.SemanticEditOption
+Microsoft.CodeAnalysis.Emit.SemanticEditOption.EmitAllParametersForMethodUpdate = 1 -> Microsoft.CodeAnalysis.Emit.SemanticEditOption
+Microsoft.CodeAnalysis.Emit.SemanticEditOption.None = 0 -> Microsoft.CodeAnalysis.Emit.SemanticEditOption
 Microsoft.CodeAnalysis.GeneratorAttribute.GeneratorAttribute(string! firstLanguage, params string![]! additionalLanguages) -> void
 Microsoft.CodeAnalysis.GeneratorAttribute.Languages.get -> string![]!
 Microsoft.CodeAnalysis.GeneratorDriver.ReplaceAdditionalText(Microsoft.CodeAnalysis.AdditionalText! oldText, Microsoft.CodeAnalysis.AdditionalText! newText) -> Microsoft.CodeAnalysis.GeneratorDriver!
