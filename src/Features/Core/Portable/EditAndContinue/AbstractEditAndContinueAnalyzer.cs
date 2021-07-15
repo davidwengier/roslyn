@@ -3200,7 +3200,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                         // For most things we just want to take the first non-null value
                         syntaxMap ??= info.SyntaxMap;
                         syntaxMapTree ??= info.SyntaxMapTree;
-                        partialType??= info.PartialType;
+                        partialType ??= info.PartialType;
 
                         // For edit options we OR everything together
                         editOptions |= info.Options;
