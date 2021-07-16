@@ -4942,8 +4942,7 @@ class Program
 
             var edits = GetTopEdits(src1, src2);
 
-            edits.VerifyRudeDiagnostics(
-                Diagnostic(RudeEditKind.Renamed, "int X", FeaturesResources.parameter));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), preserveLocalVariables: true, options: SemanticEditOption.EmitAllParametersForMethodUpdate));
         }
 
         #endregion
@@ -6986,8 +6985,7 @@ class Program
 
             var edits = GetTopEdits(src1, src2);
 
-            edits.VerifyRudeDiagnostics(
-                Diagnostic(RudeEditKind.Renamed, "int X", FeaturesResources.parameter));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), preserveLocalVariables: true, options: SemanticEditOption.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
