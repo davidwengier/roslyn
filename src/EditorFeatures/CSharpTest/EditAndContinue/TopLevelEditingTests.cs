@@ -3757,8 +3757,12 @@ record C(int X)
             edits.VerifyEdits(
                 "Update [int a]@22 -> [int b]@22");
 
-            edits.VerifyRudeDiagnostics(
-                Diagnostic(RudeEditKind.Renamed, "int b", FeaturesResources.parameter));
+            edits.VerifySemantics(
+               new[]
+               {
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.Invoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate),
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.BeginInvoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate)
+               });
         }
 
         [Fact]
@@ -6342,8 +6346,57 @@ class C
             edits.VerifyEdits(
                 "Update [string[] args]@35 -> [string[] b]@35");
 
-            edits.VerifyRudeDiagnostics(
-                Diagnostic(RudeEditKind.Renamed, "string[] b", FeaturesResources.parameter));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+        }
+
+        [Fact]
+        public void MethodUpdate_UpdateParameter_ToDiscard()
+        {
+            var src1 = @"
+class C
+{
+    void M(int a, int b)
+    {
+    }
+}";
+            var src2 = @"
+class C
+{
+    void M(int _, int _)
+    {
+    }
+}";
+            var edits = GetTopEdits(src1, src2);
+
+            edits.VerifyEdits(
+                "Update [int a]@25 -> [int _]@25",
+                "Update [int b]@32 -> [int _]@32");
+
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.M"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+        }
+
+        [Fact]
+        public void MethodUpdate_UpdateParameterAndBody()
+        {
+            var src1 = @"
+class C
+{
+    static void Main(string[] args)
+    {
+        
+    }
+}";
+            var src2 = @"
+class C
+{
+    static void Main(string[] b)
+    {
+        System.Console.Write(1);
+    }
+}";
+            var edits = GetTopEdits(src1, src2);
+
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
