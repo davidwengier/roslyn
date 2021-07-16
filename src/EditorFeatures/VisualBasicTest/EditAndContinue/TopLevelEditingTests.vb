@@ -1842,8 +1842,8 @@ End Class
             edits.VerifySemantics(
                 semanticEdits:=
                 {
-                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.Invoke")),
-                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.BeginInvoke"))
+                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.Invoke"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate),
+                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.BeginInvoke"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
                 },
                 capabilities:=EditAndContinueTestHelpers.Net6RuntimeCapabilities)
         End Sub

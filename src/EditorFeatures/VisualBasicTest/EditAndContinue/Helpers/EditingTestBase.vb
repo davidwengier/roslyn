@@ -53,27 +53,29 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.EditAndContinue.UnitTests
         Friend Shared Function SemanticEdit(kind As SemanticEditKind,
                                             symbolProvider As Func(Of Compilation, ISymbol),
                                             syntaxMap As IEnumerable(Of KeyValuePair(Of TextSpan, TextSpan)),
-                                            Optional partialType As String = Nothing) As SemanticEditDescription
+                                            Optional partialType As String = Nothing,
+                                            Optional options As SemanticEditOption = SemanticEditOption.None) As SemanticEditDescription
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,
                 If(partialType Is Nothing, Nothing, Function(c As Compilation) CType(c.GetMember(partialType), ITypeSymbol)),
                 syntaxMap,
                 hasSyntaxMap:=syntaxMap IsNot Nothing,
-                options:=SemanticEditOption.None)
+                options)
         End Function
 
         Friend Shared Function SemanticEdit(kind As SemanticEditKind,
                                             symbolProvider As Func(Of Compilation, ISymbol),
                                             Optional partialType As String = Nothing,
-                                            Optional preserveLocalVariables As Boolean = False) As SemanticEditDescription
+                                            Optional preserveLocalVariables As Boolean = False,
+                                            Optional options As SemanticEditOption = SemanticEditOption.None) As SemanticEditDescription
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,
                 If(partialType Is Nothing, Nothing, Function(c As Compilation) CType(c.GetMember(partialType), ITypeSymbol)),
                 syntaxMap:=Nothing,
                 hasSyntaxMap:=preserveLocalVariables,
-                options:=SemanticEditOption.None)
+                options)
         End Function
 
         Friend Shared Function DeletedSymbolDisplay(kind As String, displayName As String) As String
