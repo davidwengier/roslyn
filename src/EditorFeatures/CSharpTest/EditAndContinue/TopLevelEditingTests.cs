@@ -2282,7 +2282,7 @@ record C
             var edits = GetTopEdits(src1, src2);
 
             edits.VerifySemantics(
-                SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.PrintMembers"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+                SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.PrintMembers"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate));
 
             edits.VerifyRudeDiagnostics();
         }
@@ -3805,8 +3805,8 @@ record C(int X)
                 ActiveStatementsDescription.Empty,
                 new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.Invoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate),
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.BeginInvoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.Invoke"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate),
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.BeginInvoke"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate)
                 },
                 capabilities: EditAndContinueTestHelpers.Net6RuntimeCapabilities);
         }
@@ -7883,7 +7883,7 @@ class C
                 ActiveStatementsDescription.Empty,
                 new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C..ctor"), preserveLocalVariables: true, options: SemanticEditOption.EmitAllParametersForMethodUpdate)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C..ctor"), preserveLocalVariables: true, options: SemanticEditOptions.EmitAllParametersForMethodUpdate)
                 },
                 capabilities: EditAndContinueTestHelpers.Net6RuntimeCapabilities);
         }
@@ -14044,10 +14044,10 @@ readonly struct S
         }
 
         [Theory]
-        [InlineData("object", "dynamic", SemanticEditOption.None)]
-        [InlineData("string", "string?", SemanticEditOption.EmitAllParametersForMethodUpdate)]
-        [InlineData("(int a, int b)", "(int a, int c)", SemanticEditOption.EmitAllParametersForMethodUpdate)]
-        public void Parameter_Type_Update_RuntimeTypeUnchanged(string oldType, string newType, SemanticEditOption editOption)
+        [InlineData("object", "dynamic", SemanticEditOptions.None)]
+        [InlineData("string", "string?", SemanticEditOptions.EmitAllParametersForMethodUpdate)]
+        [InlineData("(int a, int b)", "(int a, int c)", SemanticEditOptions.EmitAllParametersForMethodUpdate)]
+        public void Parameter_Type_Update_RuntimeTypeUnchanged(string oldType, string newType, SemanticEditOptions editOption)
         {
             var src1 = "class C { static void M(" + oldType + " a) {} }";
             var src2 = "class C { static void M(" + newType + " a) {} }";
@@ -14172,7 +14172,7 @@ class C { static void M(string a) { } }
 
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
-                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.M"), options: SemanticEditOption.EmitAllParametersForMethodUpdate) },
+                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.M"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate) },
                 capabilities: EditAndContinueTestHelpers.Net6RuntimeCapabilities);
         }
 
@@ -14311,7 +14311,7 @@ class C { static void M(string a) { } }
 
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
-                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOption.EmitAllParametersForMethodUpdate) },
+                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate) },
                 capabilities: EditAndContinueTestHelpers.Net6RuntimeCapabilities);
         }
 
@@ -14331,7 +14331,7 @@ class C { static void M(string a) { } }
 
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
-                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOption.EmitAllParametersForMethodUpdate) },
+                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate) },
                 capabilities: EditAndContinueTestHelpers.Net6RuntimeCapabilities);
         }
 

@@ -3062,7 +3062,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
 
                         // Edits in data member initializers and constructors are deferred, edits of other members (even on partial types)
                         // do not need merging accross partial type declarations.
-                        semanticEdits.Add(new SemanticEditInfo(editKind, symbolKey, syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                        semanticEdits.Add(new SemanticEditInfo(editKind, symbolKey, syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
                     }
                 }
 
@@ -3125,7 +3125,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                         // Edits in data member initializers and constructors are deferred, edits of other members (even on partial types)
                         // do not need merging accross partial type declarations.
                         var symbolKey = SymbolKey.Create(newSymbol, cancellationToken);
-                        semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, symbolKey, syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                        semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, symbolKey, syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
                     }
                 }
 
@@ -3194,7 +3194,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                     Func<SyntaxNode, SyntaxNode?>? syntaxMap = null;
                     SyntaxTree? syntaxMapTree = null;
                     SymbolKey? partialType = null;
-                    var editOptions = SemanticEditOption.None;
+                    var editOptions = SemanticEditOptions.None;
                     foreach (var info in edit)
                     {
                         // For most things we just want to take the first non-null value
@@ -3584,38 +3584,38 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             {
                 if (hasAttributeChange)
                 {
-                    semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newDelegateType, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                    semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newDelegateType, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
                 }
 
                 if (hasReturnTypeAttributeChange)
                 {
                     // attributes applied on return type of a delegate are applied to both Invoke and BeginInvoke methods
-                    semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newDelegateInvokeMethod, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
-                    AddDelegateBeginInvokeEdit(newDelegateType, SemanticEditOption.None);
+                    semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newDelegateInvokeMethod, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
+                    AddDelegateBeginInvokeEdit(newDelegateType, SemanticEditOptions.None);
                 }
             }
             else if (newSymbol is INamedTypeSymbol or IFieldSymbol or IPropertySymbol or IEventSymbol)
             {
-                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
             }
             else if (newSymbol is ITypeParameterSymbol)
             {
-                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newSymbol.ContainingSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newSymbol.ContainingSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
             }
             else if (newSymbol is IParameterSymbol)
             {
                 var newContainingSymbol = newSymbol.ContainingSymbol;
-                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newContainingSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, SymbolKey.Create(newContainingSymbol, cancellationToken), syntaxMap, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.EmitAllParametersForMethodUpdate));
 
                 // attributes applied on parameters of a delegate are applied to both Invoke and BeginInvoke methods
                 if (newContainingSymbol.ContainingSymbol is INamedTypeSymbol { TypeKind: TypeKind.Delegate } newContainingDelegateType)
                 {
-                    AddDelegateBeginInvokeEdit(newContainingDelegateType, SemanticEditOption.EmitAllParametersForMethodUpdate);
+                    AddDelegateBeginInvokeEdit(newContainingDelegateType, SemanticEditOptions.EmitAllParametersForMethodUpdate);
                 }
             }
 
             // attribute applied on parameters or return value of a delegate are applied to both Invoke and BeginInvoke methods
-            void AddDelegateBeginInvokeEdit(INamedTypeSymbol delegateType, SemanticEditOption editOption)
+            void AddDelegateBeginInvokeEdit(INamedTypeSymbol delegateType, SemanticEditOptions editOption)
             {
                 Debug.Assert(semanticEdits != null);
 
@@ -3813,7 +3813,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             foreach (var member in GetRecordUpdatedSynthesizedMembers(compilation, recordType))
             {
                 var symbolKey = SymbolKey.Create(member, cancellationToken);
-                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, symbolKey, syntaxMap: null, syntaxMapTree: null, partialType: null, options: SemanticEditOption.None));
+                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Update, symbolKey, syntaxMap: null, syntaxMapTree: null, partialType: null, options: SemanticEditOptions.None));
             }
         }
 
@@ -4326,7 +4326,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                             syntaxMapToUse,
                             syntaxMapTree: isPartialEdit ? newSyntaxTree : null,
                             partialType: isPartialEdit ? SymbolKey.Create(newType, cancellationToken) : null,
-                            options: SemanticEditOption.None));
+                            options: SemanticEditOptions.None));
                     }
                     else
                     {
@@ -4336,7 +4336,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                             syntaxMap: null,
                             syntaxMapTree: null,
                             partialType: null,
-                            options: SemanticEditOption.None));
+                            options: SemanticEditOptions.None));
                     }
                 }
             }

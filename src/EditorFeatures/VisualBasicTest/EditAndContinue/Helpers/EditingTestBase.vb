@@ -54,7 +54,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.EditAndContinue.UnitTests
                                             symbolProvider As Func(Of Compilation, ISymbol),
                                             syntaxMap As IEnumerable(Of KeyValuePair(Of TextSpan, TextSpan)),
                                             Optional partialType As String = Nothing,
-                                            Optional options As SemanticEditOption = SemanticEditOption.None) As SemanticEditDescription
+                                            Optional options As SemanticEditOptions = SemanticEditOptions.None) As SemanticEditDescription
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,
@@ -68,7 +68,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.EditAndContinue.UnitTests
                                             symbolProvider As Func(Of Compilation, ISymbol),
                                             Optional partialType As String = Nothing,
                                             Optional preserveLocalVariables As Boolean = False,
-                                            Optional options As SemanticEditOption = SemanticEditOption.None) As SemanticEditDescription
+                                            Optional options As SemanticEditOptions = SemanticEditOptions.None) As SemanticEditDescription
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,

@@ -7,7 +7,7 @@ using System;
 namespace Microsoft.CodeAnalysis.Emit
 {
     [Flags]
-    public enum SemanticEditOption
+    public enum SemanticEditOptions
     {
         /// <summary>
         /// Nothing special about this edit

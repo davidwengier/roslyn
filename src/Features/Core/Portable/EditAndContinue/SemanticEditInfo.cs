@@ -47,7 +47,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
         /// <summary>
         /// Gets any additional options that are set for this edit
         /// </summary>
-        public SemanticEditOption Options { get; }
+        public SemanticEditOptions Options { get; }
 
         public SemanticEditInfo(
             SemanticEditKind kind,
@@ -55,7 +55,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             Func<SyntaxNode, SyntaxNode?>? syntaxMap,
             SyntaxTree? syntaxMapTree,
             SymbolKey? partialType,
-            SemanticEditOption options)
+            SemanticEditOptions options)
         {
             Kind = kind;
             Symbol = symbol;

@@ -361,7 +361,7 @@ namespace Microsoft.CodeAnalysis.Emit
             foreach (var edit in edits)
             {
                 if (edit.NewSymbol is not null &&
-                    edit.Options.HasFlag(SemanticEditOption.EmitAllParametersForMethodUpdate))
+                    edit.Options.HasFlag(SemanticEditOptions.EmitAllParametersForMethodUpdate))
                 {
                     builder.Add(edit.NewSymbol);
                 }

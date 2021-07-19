@@ -51,7 +51,7 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <summary>
         /// Gets any additional options that are set for this edit
         /// </summary>
-        public SemanticEditOption Options { get; }
+        public SemanticEditOptions Options { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="SemanticEdit"/>.
@@ -78,7 +78,7 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <paramref name="kind"/> is not a valid kind.
         /// </exception>
         public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap, bool preserveLocalVariables)
-            : this(kind, oldSymbol, newSymbol, syntaxMap, preserveLocalVariables, SemanticEditOption.None)
+            : this(kind, oldSymbol, newSymbol, syntaxMap, preserveLocalVariables, SemanticEditOptions.None)
         {
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="kind"/> is not a valid kind.
         /// </exception>
-        public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOption options = SemanticEditOption.None)
+        public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOptions options = SemanticEditOptions.None)
         {
             if (oldSymbol == null && kind != SemanticEditKind.Insert)
             {
@@ -134,7 +134,7 @@ namespace Microsoft.CodeAnalysis.Emit
             this.Options = options;
         }
 
-        internal static SemanticEdit Create(SemanticEditKind kind, ISymbolInternal oldSymbol, ISymbolInternal newSymbol, Func<SyntaxNode, SyntaxNode>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOption options = SemanticEditOption.None)
+        internal static SemanticEdit Create(SemanticEditKind kind, ISymbolInternal oldSymbol, ISymbolInternal newSymbol, Func<SyntaxNode, SyntaxNode>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOptions options = SemanticEditOptions.None)
         {
             return new SemanticEdit(kind, oldSymbol?.GetISymbol(), newSymbol?.GetISymbol(), syntaxMap, preserveLocalVariables, options);
         }
