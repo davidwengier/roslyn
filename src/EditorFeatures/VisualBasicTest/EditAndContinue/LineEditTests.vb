@@ -275,18 +275,18 @@ End Class
             Dim src1 = "
 Class C
     Shared Sub Bar()
-        Dim <N:0.0>a</N:0.0> = 1
-        Dim <N:0.1>b</N:0.1> = 2
-        <AS:0>System.Console.WriteLine(1)</AS:0>
+        Dim <N:=.0>a</N:=.0> = 1
+        Dim <N:=.1>b</N:=.1> = 2
+        <AS:=>System.Console.WriteLine(1)</AS:=>
     End Sub
 End Class
 "
             Dim src2 = "
 Class C
     Shared Sub Bar()
-             Dim <N:0.0>a</N:0.0> = 1
-        Dim <N:0.1>b</N:0.1> = 2
-        <AS:0>System.Console.WriteLine(1)</AS:0>
+             Dim <N:=.0>a</N:=.0> = 1
+        Dim <N:=.1>b</N:=.1> = 2
+        <AS:=>System.Console.WriteLine(1)</AS:=>
     End Sub
 End Class
 "
@@ -308,13 +308,13 @@ End Class
         Public Sub Method_Recompile6()
             Dim src1 = "
 Class C
-    Shared Sub Bar() : End Sub
+    Shared Sub Bar() :=End Sub
 End Class
 "
 
             Dim src2 = "
 Class C
-        Shared Sub Bar() : End Sub
+        Shared Sub Bar() :=End Sub
 End Class
 "
 
@@ -417,7 +417,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.Bar"), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.Bar"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
 #End Region
@@ -444,7 +444,7 @@ End Class"
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -629,7 +629,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 {New SourceLineUpdate(2, 3)},
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -687,7 +687,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -708,7 +708,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -729,7 +729,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -749,7 +749,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -769,7 +769,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -790,7 +790,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -811,7 +811,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -834,7 +834,7 @@ End Class
             ' to make it simpler, we recompile the constructor (by reporting a field as a node update)
             edits.VerifyLineEdits(
                 {New SourceLineUpdate(2, 3)},
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -856,7 +856,7 @@ End Class
             ' we treat "Goo + New D()" as a whole for simplicity
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -876,7 +876,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -897,7 +897,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -916,7 +916,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1092,7 +1092,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1113,7 +1113,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1134,7 +1134,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1155,7 +1155,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1176,7 +1176,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -1197,7 +1197,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifyLineEdits(
                 Array.Empty(Of SequencePointUpdates),
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 #End Region
 
@@ -1213,17 +1213,17 @@ End Class
 Class C
     Dim x As Integer = 1
     Shared Dim y As Integer = 1
-    Sub F1() : End Sub
-    Sub F2() : End Sub
+    Sub F1() :=End Sub
+    Sub F2() :=End Sub
 End Class
 Class D
-    Sub New() : End Sub
+    Sub New() :=End Sub
 #End ExternalSource
 #ExternalSource(""a"", 4)
-    Sub F3() : End Sub
+    Sub F3() :=End Sub
 #End ExternalSource
 #ExternalSource(""a"", 5)
-    Sub F4() : End Sub
+    Sub F4() :=End Sub
 #End ExternalSource
 End Class
 "
@@ -1233,15 +1233,15 @@ End Class
 Class C
     Dim x As Integer = 1
     Shared Dim y As Integer = 1
-    Sub F1() : End Sub
-    Sub F2() : End Sub
+    Sub F1() :=End Sub
+    Sub F2() :=End Sub
 End Class
 Class D
-    Sub New() : End Sub
+    Sub New() :=End Sub
 #End ExternalSource
 #ExternalSource(""a"", 4)
-    Sub F3() : End Sub
-    Sub F4() : End Sub
+    Sub F3() :=End Sub
+    Sub F4() :=End Sub
 #End ExternalSource
 End Class
 "
@@ -1271,14 +1271,14 @@ Class C
 
 
 
-    Sub F() : End Sub ' line 9
+    Sub F() :=End Sub ' line 9
 End Class
 #End ExternalSource
 "
             Dim src2 = "
 Class C
 #ExternalSource(""a"", 9)
-    Sub F() : End Sub
+    Sub F() :=End Sub
 End Class
 #End ExternalSource
 "

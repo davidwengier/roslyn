@@ -492,7 +492,7 @@ class C
             var edits = GetTopEdits(src1, src2);
             edits.VerifyLineEdits(
                 Array.Empty<SequencePointUpdates>(),
-                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Bar"), preserveLocalVariables: true) });
+                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Bar"), options: SemanticEditOptions.PreserveLocalVariables) });
         }
 
         #endregion
@@ -731,7 +731,7 @@ class C
             var edits = GetTopEdits(src1, src2);
             edits.VerifyLineEdits(
                 Array.Empty<SequencePointUpdates>(),
-                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), preserveLocalVariables: true) });
+                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables) });
         }
 
         [Fact]
@@ -783,7 +783,7 @@ class C
             var edits = GetTopEdits(src1, src2);
             edits.VerifyLineEdits(
                 Array.Empty<SequencePointUpdates>(),
-                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), preserveLocalVariables: true) });
+                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables) });
         }
 
         [Fact]
@@ -988,7 +988,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1032,7 +1032,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1056,7 +1056,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1080,7 +1080,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1104,7 +1104,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1128,7 +1128,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1151,7 +1151,7 @@ class C
                 Array.Empty<SequencePointUpdates>(),
                 semanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").StaticConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 
@@ -1359,7 +1359,7 @@ class C
             var edits = GetTopEdits(src1, src2);
             edits.VerifyLineEdits(
                 Array.Empty<SequencePointUpdates>(),
-                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), preserveLocalVariables: true) });
+                semanticEdits: new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").InstanceConstructors.Single(), options: SemanticEditOptions.PreserveLocalVariables) });
         }
 
         #endregion
