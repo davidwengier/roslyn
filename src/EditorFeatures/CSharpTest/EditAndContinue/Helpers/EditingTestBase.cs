@@ -52,10 +52,17 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue.UnitTests
             => new(rudeEditKind, squiggle, arguments, firstLine: null);
 
         internal static SemanticEditDescription SemanticEdit(SemanticEditKind kind, Func<Compilation, ISymbol> symbolProvider, IEnumerable<KeyValuePair<TextSpan, TextSpan>>? syntaxMap, string? partialType = null, SemanticEditOptions options = SemanticEditOptions.None)
-            => new(kind, symbolProvider, (partialType != null) ? c => c.GetMember<INamedTypeSymbol>(partialType) : null, syntaxMap, hasSyntaxMap: syntaxMap != null, options);
+        {
+            if (syntaxMap is not null)
+            {
+                options |= SemanticEditOptions.PreserveLocalVariables;
+            }
 
-        internal static SemanticEditDescription SemanticEdit(SemanticEditKind kind, Func<Compilation, ISymbol> symbolProvider, string? partialType = null, bool preserveLocalVariables = false, SemanticEditOptions options = SemanticEditOptions.None)
-            => new(kind, symbolProvider, (partialType != null) ? c => c.GetMember<INamedTypeSymbol>(partialType) : null, syntaxMap: null, preserveLocalVariables, options);
+            return new(kind, symbolProvider, (partialType != null) ? c => c.GetMember<INamedTypeSymbol>(partialType) : null, syntaxMap, options);
+        }
+
+        internal static SemanticEditDescription SemanticEdit(SemanticEditKind kind, Func<Compilation, ISymbol> symbolProvider, string? partialType = null, SemanticEditOptions options = SemanticEditOptions.None)
+            => new(kind, symbolProvider, (partialType != null) ? c => c.GetMember<INamedTypeSymbol>(partialType) : null, syntaxMap: null, options);
 
         internal static string DeletedSymbolDisplay(string kind, string displayName)
             => string.Format(FeaturesResources.member_kind_and_name, kind, displayName);
