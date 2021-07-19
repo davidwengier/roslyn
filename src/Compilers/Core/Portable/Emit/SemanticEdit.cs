@@ -33,7 +33,7 @@ namespace Microsoft.CodeAnalysis.Emit
 
         /// <summary>
         /// A map from syntax node in the later compilation to syntax node in the previous compilation, 
-        /// or null if <see cref="PreserveLocalVariables"/> is false and the map is not needed or 
+        /// or null if <see cref="Options"/> does not have PreserveLocalVariables set and the map is not needed or 
         /// the source of the current method is the same as the source of the previous method.
         /// </summary>
         /// <remarks>
@@ -46,7 +46,8 @@ namespace Microsoft.CodeAnalysis.Emit
         /// True if the edit is an update of the active method and local values
         /// should be preserved; false otherwise.
         /// </summary>
-        public bool PreserveLocalVariables { get; }
+        [Obsolete("Using the Options property")]
+        public bool PreserveLocalVariables => Options.HasFlag(SemanticEditOptions.PreserveLocalVariables);
 
         /// <summary>
         /// Gets any additional options that are set for this edit
@@ -78,7 +79,7 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <paramref name="kind"/> is not a valid kind.
         /// </exception>
         public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap, bool preserveLocalVariables)
-            : this(kind, oldSymbol, newSymbol, syntaxMap, preserveLocalVariables, SemanticEditOptions.None)
+            : this(kind, oldSymbol, newSymbol, syntaxMap, preserveLocalVariables ? SemanticEditOptions.PreserveLocalVariables : SemanticEditOptions.None)
         {
         }
 
@@ -94,11 +95,8 @@ namespace Microsoft.CodeAnalysis.Emit
         /// </param>
         /// <param name="syntaxMap">
         /// A map from syntax node in the later compilation to syntax node in the previous compilation, 
-        /// or null if <paramref name="preserveLocalVariables"/> is false and the map is not needed or 
+        /// or null if <paramref name="options"/> does not have PreserveLocalVariables set the map is not needed or 
         /// the source of the current method is the same as the source of the previous method.
-        /// </param>
-        /// <param name="preserveLocalVariables">
-        /// True if the edit is an update of an active method and local values should be preserved; false otherwise.
         /// </param>
         /// <param name="options">
         /// Extra options about this edit that might have an affect on what needs to be emitted
@@ -109,7 +107,9 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="kind"/> is not a valid kind.
         /// </exception>
-        public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOptions options = SemanticEditOptions.None)
+#pragma warning disable RS0027 // Public API with optional parameter(s) should have the most parameters amongst its public overloads
+        public SemanticEdit(SemanticEditKind kind, ISymbol? oldSymbol, ISymbol? newSymbol, Func<SyntaxNode, SyntaxNode?>? syntaxMap = null, SemanticEditOptions options = SemanticEditOptions.None)
+#pragma warning restore RS0027 // Public API with optional parameter(s) should have the most parameters amongst its public overloads
         {
             if (oldSymbol == null && kind != SemanticEditKind.Insert)
             {
@@ -129,14 +129,13 @@ namespace Microsoft.CodeAnalysis.Emit
             this.Kind = kind;
             this.OldSymbol = oldSymbol;
             this.NewSymbol = newSymbol;
-            this.PreserveLocalVariables = preserveLocalVariables;
             this.SyntaxMap = syntaxMap;
             this.Options = options;
         }
 
-        internal static SemanticEdit Create(SemanticEditKind kind, ISymbolInternal oldSymbol, ISymbolInternal newSymbol, Func<SyntaxNode, SyntaxNode>? syntaxMap = null, bool preserveLocalVariables = false, SemanticEditOptions options = SemanticEditOptions.None)
+        internal static SemanticEdit Create(SemanticEditKind kind, ISymbolInternal oldSymbol, ISymbolInternal newSymbol, Func<SyntaxNode, SyntaxNode>? syntaxMap = null, SemanticEditOptions options = SemanticEditOptions.None)
         {
-            return new SemanticEdit(kind, oldSymbol?.GetISymbol(), newSymbol?.GetISymbol(), syntaxMap, preserveLocalVariables, options);
+            return new SemanticEdit(kind, oldSymbol?.GetISymbol(), newSymbol?.GetISymbol(), syntaxMap, options);
         }
 
         public override int GetHashCode()

@@ -265,7 +265,8 @@ namespace Microsoft.CodeAnalysis.EditAndContinue.UnitTests
 
                 // Edit is expected to have a syntax map:
                 var actualSyntaxMap = actualSemanticEdit.SyntaxMap;
-                Assert.Equal(expectedSemanticEdit.HasSyntaxMap, actualSyntaxMap != null);
+                var expectedHasSyntaxMap = expectedSemanticEdit.Options.HasFlag(SemanticEditOptions.PreserveLocalVariables);
+                Assert.Equal(expectedHasSyntaxMap, actualSyntaxMap != null);
 
                 // If expected map is specified validate its mappings with the actual one:
                 var expectedSyntaxMap = expectedSemanticEdit.SyntaxMap;

@@ -4535,7 +4535,7 @@ End Class
                 ActiveStatementsDescription.Empty,
                 semanticEdits:=
                 {
-                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMembers("F").Single(), preserveLocalVariables:=True)
+                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMembers("F").Single(), options:=SemanticEditOptions.PreserveLocalVariables)
                 })
         End Sub
 

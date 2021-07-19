@@ -602,7 +602,7 @@ class C
             // First update adds some new synthesized members (lambda related)
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -611,7 +611,7 @@ class C
             // Second update is to a method that doesn't produce any synthesized members 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -623,7 +623,7 @@ class C
             // hence we need to account for wildcards when comparing the versions.
             var diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m2, m3, GetSyntaxMapFromMarkers(source2, source3), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m2, m3, GetSyntaxMapFromMarkers(source2, source3), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff3.VerifySynthesizedMembers(
                 "C: {<>c}",

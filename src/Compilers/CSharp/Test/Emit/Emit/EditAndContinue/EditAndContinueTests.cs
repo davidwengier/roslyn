@@ -96,7 +96,7 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue.UnitTests
             var generation0 = EmitBaseline.CreateInitialBaseline(md0, v0.CreateSymReader().GetEncMethodDebugInfo);
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, options: SemanticEditOptions.PreserveLocalVariables)));
 
             // AssemblyDef record is not emitted to delta since changes in assembly identity are not allowed:
             Assert.True(md0.MetadataReader.IsAssembly);
@@ -152,7 +152,7 @@ class C
             var diffError = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diffError.EmitResult.Diagnostics.Verify(
                 // (6,17): error CS0103: The name 'Unknown' does not exist in the current context
@@ -162,7 +162,7 @@ class C
             var diffGood = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diffGood.EmitResult.Diagnostics.Verify();
 
@@ -218,7 +218,7 @@ class Bad : Bad
             var diff = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             // All declaration errors are reported regardless of what member do we emit.
 
@@ -2279,7 +2279,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -3342,7 +3342,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             // Verify delta metadata contains expected rows.
             using var md1 = diff1.GetMetadata();
@@ -4209,7 +4209,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.Main");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.VerifyIL("C.Main",
  @"{
   // Code size       22 (0x16)
@@ -4265,7 +4265,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M", @"
 {
@@ -4357,7 +4357,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M",
 @"{
@@ -4392,7 +4392,7 @@ class C
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.M",
 @"{
@@ -4659,7 +4659,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.F");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             // Should not have generated call to ComputeStringHash nor
             // added the method to <PrivateImplementationDetails>.
@@ -4831,7 +4831,7 @@ class C
                     method0,
                     method1,
                     GetEquivalentNodesMap(method1, method0),
-                    preserveLocalVariables: true)));
+                    options: SemanticEditOptions.PreserveLocalVariables)));
 
             // "Write" should be included in string table, but "WriteLine" should not.
             Assert.True(diff1.MetadataDelta.IsIncluded("Write"));
@@ -4960,7 +4960,7 @@ class B : A<B>
             var method1 = compilation1.GetMember<MethodSymbol>("B.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL(
 @"{
@@ -5018,7 +5018,7 @@ class B : A<B>
             var method2 = compilation2.GetMember<MethodSymbol>("B.M");
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL(
 @"{
@@ -5076,7 +5076,7 @@ class B : A<B>
             var method3 = compilation3.GetMember<MethodSymbol>("B.N");
             var diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff3.VerifyIL(
 @"{
@@ -5166,11 +5166,11 @@ class B : A<B>
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Insert, null, m1, null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Insert, null, m1, null, options: SemanticEditOptions.PreserveLocalVariables)));
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m1, m2, GetEquivalentNodesMap(m2, m1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m1, m2, GetEquivalentNodesMap(m2, m1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.M",
 @"{
@@ -5254,7 +5254,7 @@ class B : A<B>
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.VerifyIL("C.Main", @"
 {
   // Code size       17 (0x11)
@@ -5304,7 +5304,7 @@ class B : A<B>
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1a = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, preserveLocalVariables: false)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1a.VerifyIL("C.M", @"
 {
@@ -5353,7 +5353,7 @@ class B : A<B>
 
             var diff1b = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1b.VerifyIL("C.M",
 @"{
@@ -5502,7 +5502,7 @@ class C
                 generation0,
                 ImmutableArray.Create(
                     SemanticEdit.Create(SemanticEditKind.Insert, null, compilation1.GetMember<NamedTypeSymbol>("A")),
-                    SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M1",
 @"{
@@ -5530,7 +5530,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.M2",
 @"{
@@ -5558,7 +5558,7 @@ class C
             var diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff3.VerifyIL("C.M2",
 @"{
@@ -5642,7 +5642,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "<>f__AnonymousType0<<A>j__TPar>: {Equals, GetHashCode, ToString}");
@@ -5665,7 +5665,7 @@ class C
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "<>f__AnonymousType0<<A>j__TPar>: {Equals, GetHashCode, ToString}");
@@ -5731,7 +5731,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var md1 = diff1.GetMetadata();
 
@@ -5752,7 +5752,7 @@ class C
 ");
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "<>f__AnonymousType0<<A>j__TPar>: {Equals, GetHashCode, ToString}");
@@ -5838,7 +5838,7 @@ namespace M
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetEquivalentNodesMap(m1, m0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetEquivalentNodesMap(m1, m0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
@@ -5942,7 +5942,7 @@ namespace M
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md1 = diff1.GetMetadata();
             diff1.VerifyIL("C.F",
@@ -6058,7 +6058,7 @@ class B
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
@@ -6086,7 +6086,7 @@ class B
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1, method2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var md2 = diff2.GetMetadata();
             var reader2 = md2.Reader;
@@ -6118,7 +6118,7 @@ class B
 
             var diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetSyntaxMapFromMarkers(source2, source3), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method2, method3, GetSyntaxMapFromMarkers(source2, source3), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var md3 = diff3.GetMetadata();
 
@@ -6245,7 +6245,7 @@ class B
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
@@ -6255,7 +6255,7 @@ class B
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, g1, g2, GetEquivalentNodesMap(g2, g1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, g1, g2, GetEquivalentNodesMap(g2, g1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md2 = diff2.GetMetadata();
             var reader2 = md2.Reader;
@@ -6265,7 +6265,7 @@ class B
 
             var diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, g2, g3, GetEquivalentNodesMap(g3, g2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, g2, g3, GetEquivalentNodesMap(g3, g2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md3 = diff3.GetMetadata();
             var reader3 = md3.Reader;
@@ -6351,7 +6351,7 @@ class B
             var method1 = compilation1.GetMember<MethodSymbol>("C.F");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             using var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
             CheckNames(new[] { reader0, reader1 }, reader1.GetTypeDefNames(), "<>f__AnonymousType0`1"); // one additional type
@@ -6430,7 +6430,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m0, m1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var reader1 = diff1.GetMetadata().Reader;
             CheckNames(new[] { reader0, reader1 }, reader1.GetTypeDefNames(), "<>f__AnonymousType2`2", "<>f__AnonymousType3`1");
@@ -6457,7 +6457,7 @@ class C
 
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m1, m2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, m1, m2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             var reader2 = diff2.GetMetadata().Reader;
             CheckNames(new[] { reader0, reader1, reader2 }, reader2.GetTypeDefNames(), "<>f__AnonymousType4`1");
@@ -6581,7 +6581,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -6595,7 +6595,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -6704,7 +6704,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -6718,7 +6718,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "C: {<>c}",
@@ -6821,7 +6821,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                  generation0,
                  ImmutableArray.Create(
-                     SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                     SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C.<>o__0#1: {<>p__0}",
@@ -6902,7 +6902,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "<>f__AnonymousType0<<A>j__TPar, <B>j__TPar>: {Equals, GetHashCode, ToString}");
@@ -6932,7 +6932,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "<>f__AnonymousType0<<A>j__TPar, <B>j__TPar>: {Equals, GetHashCode, ToString}");
@@ -7009,7 +7009,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M1");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M1",
 @"{
@@ -7082,7 +7082,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.F");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -7157,7 +7157,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M", @"
 {
@@ -7250,7 +7250,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M", @"
 {
@@ -7343,7 +7343,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M", @"
 {
@@ -7407,7 +7407,7 @@ class C
             var method1 = compilation1.GetMember<MethodSymbol>("C.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.M",
 @"
@@ -7470,7 +7470,7 @@ class B
             var method1 = compilation1.GetMember<MethodSymbol>("A.M");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
 
             // Source method with no dynamic operations.
@@ -7480,7 +7480,7 @@ class B
             method1 = compilation1.GetMember<MethodSymbol>("A.N");
             diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
 
             // Explicit .ctor with dynamic operations.
@@ -7490,7 +7490,7 @@ class B
             method1 = compilation1.GetMember<MethodSymbol>("A..ctor");
             diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
 
             // Explicit .cctor with dynamic operations.
@@ -7500,7 +7500,7 @@ class B
             method1 = compilation1.GetMember<MethodSymbol>("A..cctor");
             diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
 
             // Implicit .ctor with dynamic operations.
@@ -7510,7 +7510,7 @@ class B
             method1 = compilation1.GetMember<MethodSymbol>("B..ctor");
             diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
 
             // Implicit .cctor with dynamic operations.
@@ -7520,7 +7520,7 @@ class B
             method1 = compilation1.GetMember<MethodSymbol>("B..cctor");
             diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
             diff1.EmitResult.Diagnostics.Verify();
         }
 
@@ -7591,7 +7591,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C: {<>o__0#1}",
@@ -7632,7 +7632,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "C: {<>o__0#2, <>o__0#1}",
@@ -7739,7 +7739,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -7857,7 +7857,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.EmitResult.Diagnostics.Verify(
                 // error CS7096: Cannot continue since the edit includes a reference to an embedded type: 'I'.
@@ -7910,7 +7910,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.EmitResult.Diagnostics.Verify(
                 // (6,16): warning CS0219: The variable 'y' is assigned but its value is never used
@@ -8005,7 +8005,7 @@ public struct S
             // Disallow edits that require NoPIA references.
             var diff1A = compilation1A.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1A, GetEquivalentNodesMap(method1A, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1A, GetEquivalentNodesMap(method1A, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1A.EmitResult.Diagnostics.Verify(
                 // error CS7094: Cannot continue since the edit includes a reference to an embedded type: 'S'.
@@ -8017,7 +8017,7 @@ public struct S
             // even if the previous code included references.
             var diff1B = compilation1B.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1B, GetEquivalentNodesMap(method1B, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1B, GetEquivalentNodesMap(method1B, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1B.VerifyIL("C<T>.M1",
 @"{
@@ -8148,7 +8148,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
@@ -8255,7 +8255,7 @@ class C
             CheckNames(reader0, reader0.GetAssemblyRefNames(), "netstandard");
 
             // Use empty LocalVariableNameProvider for original locals and
-            // use preserveLocalVariables: true for the edit so that existing
+            // use PreserveLocalVariables for the edit so that existing
             // locals are retained even though all are unrecognized.
             var generation0 = EmitBaseline.CreateInitialBaseline(
                 md0,
@@ -8263,7 +8263,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md1 = diff1.GetMetadata();
             var reader1 = md1.Reader;
@@ -8276,7 +8276,7 @@ class C
             // Change method updated in generation 1.
             var diff2F = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1F, method2F, syntaxMap: s => null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1F, method2F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)));
 
             using var md2 = diff2F.GetMetadata();
             var reader2 = md2.Reader;
@@ -8288,7 +8288,7 @@ class C
             // Change method unchanged since generation 0.
             var diff2G = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1G, method2G, syntaxMap: s => null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1G, method2G, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)));
         }
 
         [Fact]
@@ -8331,7 +8331,7 @@ class C
 
                 var result = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)),
+                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)),
                     isAddedSymbol,
                     badStream,
                     ilStream,
@@ -8346,7 +8346,7 @@ class C
 
                 result = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)),
+                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)),
                     isAddedSymbol,
                     mdStream,
                     badStream,
@@ -8361,7 +8361,7 @@ class C
 
                 result = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)),
+                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)),
                     isAddedSymbol,
                     mdStream,
                     ilStream,
@@ -8416,7 +8416,7 @@ class C
 
                 var result = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)),
+                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)),
                     isAddedSymbol,
                     mdStream,
                     ilStream,
@@ -8503,7 +8503,7 @@ testData: new CompilationTestData { SymWriterFactory = _ => new MockSymUnmanaged
             var method1F = compilation1.GetMember<MethodSymbol>("C.F");
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method0F, method1F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)));
 
             var handle = MetadataTokens.BlobHandle(1);
             byte[] value0 = reader0.GetBlobBytes(handle);
@@ -8514,7 +8514,7 @@ testData: new CompilationTestData { SymWriterFactory = _ => new MockSymUnmanaged
             var method2F = compilation2.GetMember<MethodSymbol>("C.F");
             var diff2F = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1F, method2F, syntaxMap: s => null, preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, method1F, method2F, syntaxMap: s => null, options: SemanticEditOptions.PreserveLocalVariables)));
 
             byte[] value1 = reader1.GetBlobBytes(handle);
             Assert.Equal("07-02-0E-0C", BitConverter.ToString(value1));
@@ -8638,7 +8638,7 @@ public class B
 
             var diffB1 = compilationB1.EmitDifference(
                 generationB0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diffB1.VerifyIL("B.F", @"
 {
@@ -8657,7 +8657,7 @@ public class B
 
             var diffB2 = compilationB2.EmitDifference(
                diffB1.NextGeneration,
-               ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), preserveLocalVariables: true)));
+               ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diffB2.VerifyIL("B.F", @"
 {
@@ -8709,7 +8709,7 @@ public class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.EmitResult.Diagnostics.Verify();
 
@@ -8801,7 +8801,7 @@ class C
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.EmitResult.Diagnostics.Verify(
                 // (6,14): error CS7038: Failed to emit module 'Unable to read debug information of method 'C.F()' (token 0x06000001) from assembly 'PdbReadingErrorsAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null''.
@@ -8850,7 +8850,7 @@ class C
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true))));
+                    ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables))));
         }
 
         [Fact]
@@ -8919,7 +8919,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -8962,7 +8962,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.F", @"
 {
@@ -9068,7 +9068,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -9101,7 +9101,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.F", @"
 {
@@ -9196,7 +9196,7 @@ public class C : Base
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C..ctor", @"
 {
@@ -9220,7 +9220,7 @@ public class C : Base
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C..ctor", @"
 {
@@ -9304,7 +9304,7 @@ public class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C..ctor", @"
 {
@@ -9329,7 +9329,7 @@ public class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C..ctor", @"
 {
@@ -9447,7 +9447,7 @@ public class Program
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers("Program: {<>c}", "Program.<>c: {<>9__0_0, <N>b__0_0}");
 
@@ -9499,7 +9499,7 @@ public class Program
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers("Program: {<>c}", "Program.<>c: {<>9__0_0, <N>b__0_0}");
 
@@ -9619,7 +9619,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -9653,7 +9653,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.F", @"
 {
@@ -9745,7 +9745,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.F", @"
 {
@@ -9774,7 +9774,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.F", @"
 {
@@ -9915,7 +9915,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.G", @"
 {
@@ -9972,7 +9972,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.G", @"
 {
@@ -10083,7 +10083,7 @@ class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C.G", @"
 {
@@ -10111,7 +10111,7 @@ class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C.G", @"
 {
@@ -10195,7 +10195,7 @@ public class C : Base
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C..ctor", @"
 {
@@ -10218,7 +10218,7 @@ public class C : Base
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C..ctor", @"
 {
@@ -10315,7 +10315,7 @@ public class C : Base
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyUpdatedTypes("0x02000002", "0x02000004");
 
@@ -10363,7 +10363,7 @@ public class C : Base
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyUpdatedTypes("0x02000002", "0x02000004");
 
@@ -10474,7 +10474,7 @@ public class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers("C: {<>c__DisplayClass0_0}", "C.<>c__DisplayClass0_0: {x, <Method>b__0}");
 
@@ -10515,7 +10515,7 @@ public class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers("C: {<>c__DisplayClass0_0}", "C.<>c__DisplayClass0_0: {x, <Method>b__0}");
 
@@ -10608,7 +10608,7 @@ public class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifyIL("C..ctor", @"
 {
@@ -10632,7 +10632,7 @@ public class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifyIL("C..ctor", @"
 {
@@ -10726,7 +10726,7 @@ public class C
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor0, ctor1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "C.<>c__DisplayClass3_0: {x, <.ctor>b__0}",
@@ -10770,7 +10770,7 @@ public class C
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, ctor1, ctor2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "C.<>c__DisplayClass3_0: {x, <.ctor>b__0}",
@@ -10903,7 +10903,7 @@ public class Program
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "Program: {<>c}",
@@ -10957,7 +10957,7 @@ public class Program
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "Program: {<>c}",
@@ -11119,7 +11119,7 @@ public class Program
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers(
                 "Program: {<>c__DisplayClass2_0, <>c}",
@@ -11190,7 +11190,7 @@ public class Program
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers(
                 "Program.<>c__DisplayClass2_0: {x, <N>b__1}",
@@ -11353,7 +11353,7 @@ public class Program
             var diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n0, n1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff1.VerifySynthesizedMembers();
 
@@ -11403,7 +11403,7 @@ public class Program
             var diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), preserveLocalVariables: true)));
+                    SemanticEdit.Create(SemanticEditKind.Update, n1, n2, GetSyntaxMapFromMarkers(source1, source0), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diff2.VerifySynthesizedMembers();
 
@@ -11492,7 +11492,7 @@ class C
             var diffError = compilation1.EmitDifference(
               generation0,
               ImmutableArray.Create(
-                  SemanticEdit.Create(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                  SemanticEdit.Create(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), options: SemanticEditOptions.PreserveLocalVariables)));
 
             diffError.EmitResult.Diagnostics.Verify(
                        // (9,21): error CS0104: 'Timer' is an ambiguous reference between 'System.Threading.Timer' and 'System.Timers.Timer'

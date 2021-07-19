@@ -57,6 +57,11 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             SymbolKey? partialType,
             SemanticEditOptions options)
         {
+            if (syntaxMap is not null)
+            {
+                options |= SemanticEditOptions.PreserveLocalVariables;
+            }
+
             Kind = kind;
             Symbol = symbol;
             SyntaxMap = syntaxMap;

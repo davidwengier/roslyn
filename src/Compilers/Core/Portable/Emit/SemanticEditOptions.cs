@@ -15,6 +15,11 @@ namespace Microsoft.CodeAnalysis.Emit
         None = 0,
 
         /// <summary>
+        /// The semantic edit is an update of the active method and local values should be preserved
+        /// </summary>
+        PreserveLocalVariables,
+
+        /// <summary>
         /// The semantic edit is for a method update, and it requires emitting all parameters as part of the update
         /// </summary>
         EmitAllParametersForMethodUpdate

@@ -1145,7 +1145,7 @@ End Class"
 
             GetTopEdits(src1, src2).VerifySemantics(
                 ActiveStatementsDescription.Empty,
-                {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C"), preserveLocalVariables:=False)})
+                {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C"))})
         End Sub
 
         <Fact>
@@ -1175,7 +1175,7 @@ End Class"
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("G"), preserveLocalVariables:=False)
+                            SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("G"))
                         })
                 })
         End Sub
@@ -1322,7 +1322,7 @@ End Class
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         })
                 })
         End Sub
@@ -1356,7 +1356,7 @@ End Class
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         })
                 })
         End Sub
@@ -1392,7 +1392,7 @@ End Class
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         }),
                     DocumentResults()
                 })
@@ -2069,7 +2069,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.D"), preserveLocalVariables:=False)})
+                                  {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.D"))})
         End Sub
 
         <Fact>
@@ -2079,7 +2079,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.D"), preserveLocalVariables:=False)})
+                                  {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.D"))})
         End Sub
 
         <WorkItem(835827, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/835827")>
@@ -2754,7 +2754,7 @@ End Class
                             SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of EventSymbol)("E3").AddMethod),
                             SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of EventSymbol)("E3").RemoveMethod),
                             SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of EventSymbol)("E3").RaiseMethod),
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         })
                 })
         End Sub
@@ -2772,7 +2772,7 @@ End Class
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("F"), preserveLocalVariables:=False)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("F"))
                         }),
                     DocumentResults()
                 })
@@ -2792,7 +2792,7 @@ End Class
                     DocumentResults(
                         semanticEdits:=
                         {
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of MethodSymbol)("F"), preserveLocalVariables:=False)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of MethodSymbol)("F"))
                         })
                 })
         End Sub
@@ -3015,7 +3015,7 @@ End Class"
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -3034,7 +3034,7 @@ End Class"
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -3053,7 +3053,7 @@ End Class"
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -3089,7 +3089,7 @@ End Class"
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -3332,7 +3332,7 @@ End Structure
             edits.VerifyRudeDiagnostics()
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.Main"), preserveLocalVariables:=False)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.Main"))})
         End Sub
 
         <Fact>
@@ -3784,7 +3784,7 @@ End Class
 
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.F"), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.F"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -4592,7 +4592,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -4602,7 +4602,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Theory>
@@ -4631,9 +4631,9 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4664,7 +4664,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -4681,7 +4681,7 @@ End Class
                 {
                     DocumentResults(),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4738,7 +4738,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -4778,7 +4778,7 @@ End Class
                 {
                     DocumentResults(),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4797,7 +4797,7 @@ End Class
                     DocumentResults(
                         ),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4816,7 +4816,7 @@ End Class
                     DocumentResults(
                         ),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4834,7 +4834,7 @@ End Class
                 {
                     DocumentResults(),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -4869,7 +4869,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         )
                 })
@@ -4888,7 +4888,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         )
                 })
@@ -4907,7 +4907,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         )
                 })
@@ -4926,7 +4926,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         )
                 })
@@ -4945,7 +4945,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         )
                 })
@@ -4964,7 +4964,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults()
                 })
         End Sub
@@ -5420,7 +5420,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifySemantics(ActiveStatementsDescription.Empty, semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.First(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.First(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -5454,12 +5454,12 @@ End Class"
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults(
                         semanticEdits:=
                         {
                             SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of MethodSymbol)("F")),
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         })
                 })
         End Sub
@@ -5496,10 +5496,10 @@ End Class
                         semanticEdits:=
                         {
                             SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember(Of MethodSymbol)("F")),
-                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                            SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                         }),
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)})
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)})
                 })
         End Sub
 
@@ -5877,7 +5877,7 @@ End Class
                 "Update [a(3)]@14 -> [a(2)]@14")
 
             edits.VerifySemantics(
-                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").Constructors.Single(), preserveLocalVariables:=True)})
+                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").Constructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact(Skip:="https://github.com/dotnet/roslyn/issues/54729")>
@@ -6891,7 +6891,7 @@ End Class
                 {GetTopEdits(srcA1, srcA2), GetTopEdits(srcB1, srcB2)},
                 {
                     DocumentResults(
-                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)}),
+                        semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)}),
                     DocumentResults()
                 })
         End Sub
@@ -6943,7 +6943,7 @@ End Class
                 "Update [a As Integer = 0]@14 -> [a As Integer = 1]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -6956,7 +6956,7 @@ End Class
                 "Update [Property a As Integer = 0]@10 -> [Property a As Integer = 1]@10")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -6969,7 +6969,7 @@ End Class
                 "Update [Property a As New C(0)]@10 -> [Property a As New C(1)]@10")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -6982,7 +6982,7 @@ End Class
                 "Update [a(1)]@14 -> [a(2)]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -6995,7 +6995,7 @@ End Class
                 "Update [a As New Decimal(1)]@14 -> [a As New Decimal(2)]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         ''' <summary>
@@ -7019,7 +7019,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7044,7 +7044,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7058,7 +7058,7 @@ End Class
                 "Update [a, b As New Decimal(1)]@14 -> [a, b As New Decimal(2)]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7071,7 +7071,7 @@ End Class
                 "Update [Property a As New Decimal(1)]@10 -> [Property a As New Decimal(2)]@10")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7084,7 +7084,7 @@ End Class
                 "Update [a = 1]@14 -> [a = 2]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7097,7 +7097,7 @@ End Class
                 "Update [Property a = 1]@10 -> [Property a = 2]@10")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7110,7 +7110,7 @@ End Class
                 "Update [a As Integer = 0]@14 -> [a As Integer]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7123,7 +7123,7 @@ End Class
                 "Update [Property a As Integer = 0]@10 -> [Property a As Integer]@10")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7136,7 +7136,7 @@ End Class
                 "Update [a As Integer]@14 -> [a As Integer = 0]@14")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7149,7 +7149,7 @@ End Class
                 "Update [Property a As Integer]@10 -> [Property a As Integer = 0]@10")
 
             edits.VerifySemantics(
-                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7162,7 +7162,7 @@ End Class
                 "Update [Property a As New Integer()]@10 -> [Property a As Integer = 0]@10")
 
             edits.VerifySemantics(
-                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7178,7 +7178,7 @@ End Class
                 "Delete [()]@47")
 
             edits.VerifySemantics(
-                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                semanticEdits:={SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7194,7 +7194,7 @@ End Class
                 "Delete [()]@51")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7210,7 +7210,7 @@ End Class
                 "Delete [()]@38")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7226,7 +7226,7 @@ End Class
                 "Delete [()]@56")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7242,7 +7242,7 @@ End Class
                 "Delete [()]@43")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7272,7 +7272,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7282,7 +7282,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7295,7 +7295,7 @@ End Class
                 "Update [a As Integer]@17 -> [a As Integer = 0]@17")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7308,7 +7308,7 @@ End Class
                 "Update [a As Integer]@15 -> [a As Integer = 0]@15")
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7318,7 +7318,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7328,7 +7328,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").SharedConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7338,7 +7338,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7348,7 +7348,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7358,7 +7358,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7368,7 +7368,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7378,7 +7378,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7388,7 +7388,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7398,8 +7398,8 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), preserveLocalVariables:=True),
-                                  SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), options:=SemanticEditOptions.PreserveLocalVariables),
+                                  SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7409,8 +7409,8 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), preserveLocalVariables:=True),
-                                  SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), options:=SemanticEditOptions.PreserveLocalVariables),
+                                  SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7420,7 +7420,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7430,7 +7430,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7440,7 +7440,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7450,7 +7450,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7460,8 +7460,8 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), preserveLocalVariables:=True),
-                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), options:=SemanticEditOptions.PreserveLocalVariables),
+                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7471,8 +7471,8 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), preserveLocalVariables:=True),
-                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Integer)"), options:=SemanticEditOptions.PreserveLocalVariables),
+                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(Function(m) m.ToString() = "Private Sub New(a As Boolean)"), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7562,7 +7562,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7572,7 +7572,7 @@ End Class
             Dim edits = GetTopEdits(src1, src2)
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
-                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                  {SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7657,7 +7657,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7669,7 +7669,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7681,7 +7681,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7693,7 +7693,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7705,7 +7705,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7717,7 +7717,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single, options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7737,7 +7737,7 @@ End Class
             edits.VerifySemantics(semanticEdits:=
             {
                 SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("a")),
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7756,7 +7756,7 @@ End Class
             edits.VerifySemantics(semanticEdits:=
             {
                 SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("a")),
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7773,7 +7773,7 @@ End Class
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
                 {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.b")),
-                 SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                 SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7789,7 +7789,7 @@ End Class
             edits.VerifySemantics(
                 ActiveStatementsDescription.Empty,
                 {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.b")),
-                 SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                 SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7806,7 +7806,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 
@@ -7853,7 +7853,7 @@ End Class
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -7872,7 +7872,7 @@ End Class
                     DocumentResults(),
                     DocumentResults(semanticEdits:=
                     {
-                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", preserveLocalVariables:=True)
+                        SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), partialType:="C", options:=SemanticEditOptions.PreserveLocalVariables)
                     })
                 })
         End Sub
@@ -7890,7 +7890,7 @@ End Class
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
                                   {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.a")),
-                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -7904,7 +7904,7 @@ End Class
 
             edits.VerifySemantics(ActiveStatementsDescription.Empty,
                                   {SemanticEdit(SemanticEditKind.Insert, Function(c) c.GetMember("C.a")),
-                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)})
+                                   SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)})
         End Sub
 
         <Fact>
@@ -8779,7 +8779,7 @@ End Class
             edits.VerifySemantics(ActiveStatementsDescription.Empty, semanticEdits:=
             {
                 SemanticEdit(SemanticEditKind.Update, Function(c) CType(c.GetMember(Of NamedTypeSymbol)("C").GetMembers("P").First(), IPropertySymbol).GetMethod),
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), preserveLocalVariables:=True)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.PreserveLocalVariables)
             })
         End Sub
 

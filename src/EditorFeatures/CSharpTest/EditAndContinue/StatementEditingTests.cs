@@ -3329,7 +3329,7 @@ class C
                 ActiveStatementsDescription.Empty,
                 expectedSemanticEdits: new[]
                 {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").GetMembers("F").Single(), preserveLocalVariables: true)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember<INamedTypeSymbol>("C").GetMembers("F").Single(), options: SemanticEditOptions.PreserveLocalVariables)
                 });
         }
 

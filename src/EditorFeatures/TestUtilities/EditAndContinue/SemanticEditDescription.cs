@@ -21,21 +21,17 @@ namespace Microsoft.CodeAnalysis.EditAndContinue.UnitTests
         /// </summary>
         public readonly IEnumerable<KeyValuePair<TextSpan, TextSpan>>? SyntaxMap;
 
-        public readonly bool HasSyntaxMap;
-
         public SemanticEditDescription(
             SemanticEditKind kind,
             Func<Compilation, ISymbol> symbolProvider,
             Func<Compilation, ITypeSymbol>? partialType,
             IEnumerable<KeyValuePair<TextSpan, TextSpan>>? syntaxMap,
-            bool hasSyntaxMap,
             SemanticEditOptions options)
         {
             Kind = kind;
             SymbolProvider = symbolProvider;
             SyntaxMap = syntaxMap;
             PartialType = partialType;
-            HasSyntaxMap = hasSyntaxMap;
             Options = options;
         }
     }

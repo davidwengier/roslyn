@@ -537,7 +537,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                         oldSymbol: oldSymbol,
                         newSymbol: newSymbol,
                         syntaxMap: edit.SyntaxMap,
-                        preserveLocalVariables: edit.SyntaxMap != null));
+                        options: edit.SyntaxMap is null ? SemanticEditOptions.None : SemanticEditOptions.PreserveLocalVariables));
                 }
             }
 
@@ -583,7 +583,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                     var (oldSymbol, newSymbol) = resolvedSymbols[i];
                     if (visitedSymbols.Add(newSymbol))
                     {
-                        mergedEditsBuilder.Add(new SemanticEdit(SemanticEditKind.Update, oldSymbol, newSymbol, mergedSyntaxMaps[edit.PartialType.Value], preserveLocalVariables: true));
+                        mergedEditsBuilder.Add(new SemanticEdit(SemanticEditKind.Update, oldSymbol, newSymbol, mergedSyntaxMaps[edit.PartialType.Value], options: SemanticEditOptions.PreserveLocalVariables));
                     }
                 }
             }

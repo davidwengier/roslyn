@@ -61,14 +61,14 @@ End Class
             ' Semantic errors are reported only for the bodies of members being emitted.
             Dim diffError = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diffError.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_NameNotDeclared1, "Unknown").WithArguments("Unknown").WithLocation(4, 17))
 
             Dim diffGood = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diffGood.EmitResult.Diagnostics.Verify()
             diffGood.VerifyIL("C.G", "
@@ -115,7 +115,7 @@ End Class
 
             Dim diff = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_TypeInItsInheritsClause1, "Bad").WithArguments("Bad").WithLocation(9, 12))
@@ -643,7 +643,7 @@ End Class
 
             Dim testData1 = New CompilationTestData()
             Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -732,7 +732,7 @@ End Class
 
                 Dim testData1 = New CompilationTestData()
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.F")
-                Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)
+                Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)
                 Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -862,7 +862,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.F", "
 {
@@ -1084,7 +1084,7 @@ End Class
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
                 diff1.VerifyIL("C.M", <![CDATA[
 {
   // Code size       11 (0xb)
@@ -1184,7 +1184,7 @@ End Class
                 Dim method1A = compilation1A.GetMember(Of MethodSymbol)("C.M1")
                 Dim diff1A = compilation1A.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1A, GetEquivalentNodesMap(method1A, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1A, GetEquivalentNodesMap(method1A, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 diff1A.EmitResult.Diagnostics.AssertTheseDiagnostics(<errors><![CDATA[
 BC37230: Cannot continue since the edit includes a reference to an embedded type: 'IA'.
@@ -1195,7 +1195,7 @@ BC37230: Cannot continue since the edit includes a reference to an embedded type
                 Dim method1B = compilation1B.GetMember(Of MethodSymbol)("C.M1")
                 Dim diff1B = compilation1B.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1B, GetEquivalentNodesMap(method1B, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1B, GetEquivalentNodesMap(method1B, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
                 diff1B.VerifyIL("C(Of T).M1", <![CDATA[
 {
   // Code size        9 (0x9)
@@ -1263,7 +1263,7 @@ End Class
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
                 diff1.EmitResult.Diagnostics.AssertTheseDiagnostics(<errors><![CDATA[
 BC37230: Cannot continue since the edit includes a reference to an embedded type: 'IA'.
 BC37230: Cannot continue since the edit includes a reference to an embedded type: 'IB'.
@@ -1329,7 +1329,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.F", "
 {
@@ -1388,13 +1388,13 @@ End Class
                 CheckNames(reader0, reader0.GetAssemblyRefNames(), "mscorlib", "Microsoft.VisualBasic")
                 Dim method0 = compilation0.GetMember(Of MethodSymbol)("C.M")
                 ' Use empty LocalVariableNameProvider for original locals and
-                ' use preserveLocalVariables: true for the edit so that existing
+                ' use PreserveLocalVariables for the edit so that existing
                 ' locals are retained even though all are unrecognized.
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, EmptyLocalsProvider)
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, syntaxMap:=Function(s) Nothing, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, syntaxMap:=Function(s) Nothing, options:=SemanticEditOptions.PreserveLocalVariables)))
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
                     Dim readers = {reader0, reader1}
@@ -1483,7 +1483,7 @@ End Module</file>
 
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Insert, Nothing, method1, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Insert, Nothing, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
@@ -1543,7 +1543,7 @@ End Module</file>
 
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, getter0, getter1, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, getter0, getter1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 diff1.VerifyIL("Module1.get_P", "
 {
@@ -1604,7 +1604,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -1769,7 +1769,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("
 {
@@ -1793,7 +1793,7 @@ End Class
 }
 ")
 
-            diff1.VerifyPdb({&H06000001UI, &H06000002UI, &H06000003UI, &H06000004UI, &H06000005UI},
+            diff1.VerifyPdb({&H6000001UI, &H6000002UI, &H6000003UI, &H6000004UI, &H6000005UI},
 <symbols>
     <files>
         <file id="1" name="" language="VB"/>
@@ -1823,7 +1823,7 @@ End Class
 
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifyIL("
 {
@@ -1845,7 +1845,7 @@ End Class
 }
 ")
 
-            diff2.VerifyPdb({&H06000001UI, &H06000002UI, &H06000003UI, &H06000004UI, &H06000005UI},
+            diff2.VerifyPdb({&H6000001UI, &H6000002UI, &H6000003UI, &H6000004UI, &H6000005UI},
 <symbols>
     <files>
         <file id="1" name="" language="VB"/>
@@ -1880,7 +1880,7 @@ End Class
 
             Dim diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2, method3, GetEquivalentNodesMap(method3, method2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff3.VerifyIL("
 {
@@ -1903,7 +1903,7 @@ End Class
 }
 ")
 
-            diff3.VerifyPdb({&H06000001UI, &H06000002UI, &H06000003UI, &H06000004UI, &H06000005UI},
+            diff3.VerifyPdb({&H6000001UI, &H6000002UI, &H6000003UI, &H6000004UI, &H6000005UI},
 <symbols>
     <files>
         <file id="1" name="" language="VB"/>
@@ -1971,12 +1971,12 @@ End Class
             Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Insert, Nothing, method1, Nothing, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Insert, Nothing, method1, Nothing, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim method2 = compilation2.GetMember(Of MethodSymbol)("C.M")
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options:=SemanticEditOptions.PreserveLocalVariables)))
             diff2.VerifyIL("C.M", <![CDATA[
 {
   // Code size       10 (0xa)
@@ -1992,7 +1992,7 @@ End Class
   IL_0009:  ret
 }
 ]]>.Value)
-            diff2.VerifyPdb({&H06000002UI},
+            diff2.VerifyPdb({&H6000002UI},
 <symbols>
     <files>
         <file id="1" name="" language="VB"/>
@@ -2055,7 +2055,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(ModuleMetadata.CreateFromImage(bytes0), testData0.GetMethodData("C.Main").EncDebugInfoProvider)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
             diff1.VerifyIL("C.Main", "
 {
   // Code size       17 (0x11)
@@ -2129,7 +2129,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", <![CDATA[
 {
@@ -2215,7 +2215,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -2309,7 +2309,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -2394,7 +2394,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -2529,7 +2529,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -2710,7 +2710,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -2889,7 +2889,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -3085,7 +3085,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.M", "
 {
@@ -3238,7 +3238,7 @@ End Class
 
             Dim generation0 = EmitBaseline.CreateInitialBaseline(ModuleMetadata.CreateFromImage(bytes0), testData0.GetMethodData("C.M").EncDebugInfoProvider)
 
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -3339,7 +3339,7 @@ End Class
 
             Dim generation0 = EmitBaseline.CreateInitialBaseline(ModuleMetadata.CreateFromImage(bytes0), testData0.GetMethodData("C.M").EncDebugInfoProvider)
 
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -3442,7 +3442,7 @@ End Class
 
             Dim generation0 = EmitBaseline.CreateInitialBaseline(ModuleMetadata.CreateFromImage(bytes0), testData0.GetMethodData("C.M").EncDebugInfoProvider)
 
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -3558,7 +3558,7 @@ End Class
 
             Dim generation0 = EmitBaseline.CreateInitialBaseline(ModuleMetadata.CreateFromImage(bytes0), testData0.GetMethodData("C.M").EncDebugInfoProvider)
 
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -3652,7 +3652,7 @@ End Class
 ")
             Dim diff1 = compilation1.EmitDifference(generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.F", "
 {
@@ -3672,7 +3672,7 @@ End Class
 
             Dim diff2 = compilation2.EmitDifference(diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifyIL("C.F", "
 {
@@ -3728,7 +3728,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.F", "
 {
@@ -3744,7 +3744,7 @@ End Class
 ")
             Dim diff2 = compilation2.EmitDifference(diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifyIL("C.F", "
 {
@@ -3828,7 +3828,7 @@ End Namespace
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("M.B.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
@@ -3950,7 +3950,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim md1 = diff1.GetMetadata()
             Dim reader1 = md1.Reader
@@ -3977,7 +3977,7 @@ End Class
 ")
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim md2 = diff2.GetMetadata()
             Dim reader2 = md2.Reader
@@ -4009,7 +4009,7 @@ End Class
 
             Dim diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2, method3, GetSyntaxMapFromMarkers(source2, source3), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2, method3, GetSyntaxMapFromMarkers(source2, source3), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim md3 = diff3.GetMetadata()
             Dim reader3 = md3.Reader
@@ -4129,7 +4129,7 @@ End Class
                 Dim method1G = compilation1.GetMember(Of MethodSymbol)("C.G")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0F, method1F, GetEquivalentNodesMap(method1F, method0F), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0F, method1F, GetEquivalentNodesMap(method1F, method0F), options:=SemanticEditOptions.PreserveLocalVariables)))
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
                     CheckNames({reader0, reader1}, reader1.GetTypeDefNames(), "VB$AnonymousType_1`2") ' one additional type
@@ -4137,7 +4137,7 @@ End Class
                     Dim method2G = compilation2.GetMember(Of MethodSymbol)("C.G")
                     Dim diff2 = compilation2.EmitDifference(
                         diff1.NextGeneration,
-                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1G, method2G, GetEquivalentNodesMap(method2G, method1G), preserveLocalVariables:=True)))
+                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1G, method2G, GetEquivalentNodesMap(method2G, method1G), options:=SemanticEditOptions.PreserveLocalVariables)))
                     Using md2 = diff2.GetMetadata()
                         Dim reader2 = md2.Reader
                         CheckNames({reader0, reader1, reader2}, reader2.GetTypeDefNames()) ' no additional types
@@ -4145,7 +4145,7 @@ End Class
                         Dim method3G = compilation3.GetMember(Of MethodSymbol)("C.G")
                         Dim diff3 = compilation3.EmitDifference(
                         diff2.NextGeneration,
-                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2G, method3G, GetEquivalentNodesMap(method3G, method2G), preserveLocalVariables:=True)))
+                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method2G, method3G, GetEquivalentNodesMap(method3G, method2G), options:=SemanticEditOptions.PreserveLocalVariables)))
                         Using md3 = diff3.GetMetadata()
                             Dim reader3 = md3.Reader
                             CheckNames({reader0, reader1, reader2, reader3}, reader3.GetTypeDefNames()) ' no additional types
@@ -4198,7 +4198,7 @@ End Class
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
                     CheckNames({reader0, reader1}, reader1.GetTypeDefNames(), "VB$AnonymousType_3`2")
@@ -4280,7 +4280,7 @@ End Class
                 Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.M")
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
                 Using md1 = diff1.GetMetadata()
                     Dim reader1 = md1.Reader
                     CheckNames({reader0, reader1}, reader1.GetTypeDefNames(), "VB$AnonymousType_1`1")
@@ -4309,7 +4309,7 @@ End Class
                     Dim method2 = compilation2.GetMember(Of MethodSymbol)("C.M")
                     Dim diff2 = compilation2.EmitDifference(
                         diff1.NextGeneration,
-                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), preserveLocalVariables:=True)))
+                        ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method1, method2, GetEquivalentNodesMap(method2, method1), options:=SemanticEditOptions.PreserveLocalVariables)))
                     Using md2 = diff2.GetMetadata()
                         Dim reader2 = md2.Reader
                         CheckNames({reader0, reader1, reader2}, reader2.GetTypeDefNames())
@@ -4433,7 +4433,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {_Closure$__}",
@@ -4444,7 +4444,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {_Closure$__}",
@@ -4515,7 +4515,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifyIL("C.F", "
 {
@@ -4541,7 +4541,7 @@ End Class
 ")
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifyIL("C.F", "
 {
@@ -4624,7 +4624,7 @@ End Class
                 Function(m) Nothing)
             Dim testData1 = New CompilationTestData()
             Dim method1 = compilation1.GetMember(Of MethodSymbol)("C.F")
-            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)
+            Dim edit = New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(edit))
@@ -4745,7 +4745,7 @@ End Module
 
             Dim diff0 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff0.VerifyIL("
 {
@@ -4971,7 +4971,7 @@ End Class"
 
             Dim diffB1 = compilationB1.EmitDifference(
                 generationB0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diffB1.VerifyIL("B.F", "
 {
@@ -4990,7 +4990,7 @@ End Class"
 
             Dim diffB2 = compilationB2.EmitDifference(
                diffB1.NextGeneration,
-               ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), preserveLocalVariables:=True)))
+               ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diffB2.VerifyIL("B.F", "
 {
@@ -5052,7 +5052,7 @@ End Class
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim md1 = diff1.GetMetadata()
             Dim reader1 = md1.Reader
@@ -5195,7 +5195,7 @@ End Class")
 
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             Dim md1 = diff1.GetMetadata()
             Dim reader1 = md1.Reader
@@ -5340,7 +5340,7 @@ End Class
 
             Dim diffError = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, e0, e1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diffError.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_AmbiguousInImports2, "Timer").WithArguments("Timer", "System.Threading, System.Timers").WithLocation(7, 21))

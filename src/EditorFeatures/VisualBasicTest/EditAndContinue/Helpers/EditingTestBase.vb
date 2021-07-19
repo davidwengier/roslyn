@@ -55,26 +55,26 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.EditAndContinue.UnitTests
                                             syntaxMap As IEnumerable(Of KeyValuePair(Of TextSpan, TextSpan)),
                                             Optional partialType As String = Nothing,
                                             Optional options As SemanticEditOptions = SemanticEditOptions.None) As SemanticEditDescription
+            If syntaxMap IsNot Nothing Then
+                options = options Or SemanticEditOptions.PreserveLocalVariables
+            End If
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,
                 If(partialType Is Nothing, Nothing, Function(c As Compilation) CType(c.GetMember(partialType), ITypeSymbol)),
                 syntaxMap,
-                hasSyntaxMap:=syntaxMap IsNot Nothing,
                 options)
         End Function
 
         Friend Shared Function SemanticEdit(kind As SemanticEditKind,
                                             symbolProvider As Func(Of Compilation, ISymbol),
                                             Optional partialType As String = Nothing,
-                                            Optional preserveLocalVariables As Boolean = False,
                                             Optional options As SemanticEditOptions = SemanticEditOptions.None) As SemanticEditDescription
             Return New SemanticEditDescription(
                 kind,
                 symbolProvider,
                 If(partialType Is Nothing, Nothing, Function(c As Compilation) CType(c.GetMember(partialType), ITypeSymbol)),
                 syntaxMap:=Nothing,
-                hasSyntaxMap:=preserveLocalVariables,
                 options)
         End Function
 

@@ -6,11 +6,12 @@ Microsoft.CodeAnalysis.Emit.EmitDifferenceResult.UpdatedMethods.get -> System.Co
 Microsoft.CodeAnalysis.Emit.EmitDifferenceResult.UpdatedTypes.get -> System.Collections.Immutable.ImmutableArray<System.Reflection.Metadata.TypeDefinitionHandle>
 Microsoft.CodeAnalysis.Emit.SemanticEdit.Options.get -> Microsoft.CodeAnalysis.Emit.SemanticEditOptions
 *REMOVED*Microsoft.CodeAnalysis.Emit.SemanticEdit.SemanticEdit(Microsoft.CodeAnalysis.Emit.SemanticEditKind kind, Microsoft.CodeAnalysis.ISymbol? oldSymbol, Microsoft.CodeAnalysis.ISymbol? newSymbol, System.Func<Microsoft.CodeAnalysis.SyntaxNode!, Microsoft.CodeAnalysis.SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false) -> void
+Microsoft.CodeAnalysis.Emit.SemanticEdit.SemanticEdit(Microsoft.CodeAnalysis.Emit.SemanticEditKind kind, Microsoft.CodeAnalysis.ISymbol? oldSymbol, Microsoft.CodeAnalysis.ISymbol? newSymbol, System.Func<Microsoft.CodeAnalysis.SyntaxNode!, Microsoft.CodeAnalysis.SyntaxNode?>? syntaxMap = null, Microsoft.CodeAnalysis.Emit.SemanticEditOptions options = Microsoft.CodeAnalysis.Emit.SemanticEditOptions.None) -> void
 Microsoft.CodeAnalysis.Emit.SemanticEdit.SemanticEdit(Microsoft.CodeAnalysis.Emit.SemanticEditKind kind, Microsoft.CodeAnalysis.ISymbol? oldSymbol, Microsoft.CodeAnalysis.ISymbol? newSymbol, System.Func<Microsoft.CodeAnalysis.SyntaxNode!, Microsoft.CodeAnalysis.SyntaxNode?>? syntaxMap, bool preserveLocalVariables) -> void
-Microsoft.CodeAnalysis.Emit.SemanticEdit.SemanticEdit(Microsoft.CodeAnalysis.Emit.SemanticEditKind kind, Microsoft.CodeAnalysis.ISymbol? oldSymbol, Microsoft.CodeAnalysis.ISymbol? newSymbol, System.Func<Microsoft.CodeAnalysis.SyntaxNode!, Microsoft.CodeAnalysis.SyntaxNode?>? syntaxMap = null, bool preserveLocalVariables = false, Microsoft.CodeAnalysis.Emit.SemanticEditOptions options = Microsoft.CodeAnalysis.Emit.SemanticEditOptions.None) -> void
 Microsoft.CodeAnalysis.Emit.SemanticEditOptions
-Microsoft.CodeAnalysis.Emit.SemanticEditOptions.EmitAllParametersForMethodUpdate = 1 -> Microsoft.CodeAnalysis.Emit.SemanticEditOptions
+Microsoft.CodeAnalysis.Emit.SemanticEditOptions.EmitAllParametersForMethodUpdate = 2 -> Microsoft.CodeAnalysis.Emit.SemanticEditOptions
 Microsoft.CodeAnalysis.Emit.SemanticEditOptions.None = 0 -> Microsoft.CodeAnalysis.Emit.SemanticEditOptions
+Microsoft.CodeAnalysis.Emit.SemanticEditOptions.PreserveLocalVariables = 1 -> Microsoft.CodeAnalysis.Emit.SemanticEditOptions
 Microsoft.CodeAnalysis.GeneratorAttribute.GeneratorAttribute(string! firstLanguage, params string![]! additionalLanguages) -> void
 Microsoft.CodeAnalysis.GeneratorAttribute.Languages.get -> string![]!
 Microsoft.CodeAnalysis.GeneratorDriver.ReplaceAdditionalText(Microsoft.CodeAnalysis.AdditionalText! oldText, Microsoft.CodeAnalysis.AdditionalText! newText) -> Microsoft.CodeAnalysis.GeneratorDriver!

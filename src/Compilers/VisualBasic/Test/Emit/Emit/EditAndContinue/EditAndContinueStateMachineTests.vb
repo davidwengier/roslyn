@@ -1022,9 +1022,9 @@ End Class
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, methodShort0, methodShort1, preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, methodInt0, methodInt1, preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, methodLong0, methodLong1, preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, methodShort0, methodShort1, options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, methodInt0, methodInt1, options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, methodLong0, methodLong1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 Using md1 = diff1.GetMetadata()
                     ' notice no TypeDefs, FieldDefs
@@ -1091,7 +1091,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, EmptyLocalsProvider)
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -1241,7 +1241,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, EmptyLocalsProvider)
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000004")
@@ -1489,7 +1489,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -1601,7 +1601,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -1718,7 +1718,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -1831,7 +1831,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -1972,7 +1972,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetSyntaxMapByKind(method0, SyntaxKind.ForEachStatement), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetSyntaxMapByKind(method0, SyntaxKind.ForEachStatement), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000005")
@@ -2125,7 +2125,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000004")
@@ -2285,7 +2285,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000004")
@@ -2450,7 +2450,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000004")
@@ -2611,7 +2611,7 @@ End Class
                 Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, Function(handle) symReader.GetEncMethodDebugInfo(handle))
                 Dim diff1 = compilation1.EmitDifference(
                     generation0,
-                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), preserveLocalVariables:=True)))
+                    ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, method0, method1, GetEquivalentNodesMap(method1, method0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
                 ' only methods with sequence points should be listed in UpdatedMethods:
                 diff1.VerifyUpdatedMethods("0x06000004")
@@ -2886,8 +2886,8 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                     generation0,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, g0, g1, GetEquivalentNodesMap(g1, g0), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, f0, f1, GetEquivalentNodesMap(f1, f0), options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, g0, g1, GetEquivalentNodesMap(g1, g0), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F, VB$StateMachine_2_G}",
@@ -2897,7 +2897,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                     diff1.NextGeneration,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetEquivalentNodesMap(f2, f1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F, VB$StateMachine_2_G}",
@@ -2907,8 +2907,8 @@ End Class
             Dim diff3 = compilation3.EmitDifference(
                     diff2.NextGeneration,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, g2, g3, GetEquivalentNodesMap(g3, g2), preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, h2, h3, GetEquivalentNodesMap(h3, h2), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, g2, g3, GetEquivalentNodesMap(g3, g2), options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, h2, h3, GetEquivalentNodesMap(h3, h2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff3.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_2_G, VB$StateMachine_3_H, VB$StateMachine_1_F}",
@@ -3400,8 +3400,8 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                     generation0,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapByKind(f0, SyntaxKind.FunctionBlock), preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapByKind(g0, SyntaxKind.FunctionBlock), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapByKind(f0, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, g0, g1, GetSyntaxMapByKind(g0, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_4_F, VB$StateMachine_5_G}",
@@ -3411,7 +3411,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                     diff1.NextGeneration,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapByKind(f1, SyntaxKind.FunctionBlock), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapByKind(f1, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_4_F, VB$StateMachine_5_G}",
@@ -3421,8 +3421,8 @@ End Class
             Dim diff3 = compilation3.EmitDifference(
                     diff2.NextGeneration,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, g2, g3, GetSyntaxMapByKind(g2, SyntaxKind.FunctionBlock), preserveLocalVariables:=True),
-                        New SemanticEdit(SemanticEditKind.Update, h2, h3, GetSyntaxMapByKind(h2, SyntaxKind.FunctionBlock), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, g2, g3, GetSyntaxMapByKind(g2, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables),
+                        New SemanticEdit(SemanticEditKind.Update, h2, h3, GetSyntaxMapByKind(h2, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff3.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_5_G, VB$StateMachine_6_H, VB$StateMachine_4_F}",
@@ -3875,7 +3875,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                     diff1.NextGeneration,
                     ImmutableArray.Create(
-                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapByKind(f1, SyntaxKind.FunctionBlock), preserveLocalVariables:=True)))
+                        New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapByKind(f1, SyntaxKind.FunctionBlock), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1#1_F}",
@@ -4004,7 +4004,7 @@ End Class")
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             ' note that the types of the awaiter fields $A0, $A1 are the same as in the previous generation
             diff1.VerifySynthesizedFields("C._Closure$__.VB$StateMachine___Lambda$__1-0",
@@ -4017,7 +4017,7 @@ End Class")
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             ' note that the types of the awaiter fields $A0, $A1 are the same as in the previous generation
             diff2.VerifySynthesizedFields("C._Closure$__.VB$StateMachine___Lambda$__1-0",
@@ -4141,7 +4141,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F}",
@@ -4152,7 +4152,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F}",
@@ -4282,7 +4282,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F}",
@@ -4293,7 +4293,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff2.VerifySynthesizedMembers(
                 "C: {VB$StateMachine_1_F}",
@@ -4355,7 +4355,7 @@ End Class
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.VerifySynthesizedMembers(
                 "C: {_Closure$__, VB$StateMachine_1_F}",
@@ -4366,7 +4366,7 @@ End Class
             Dim diff2 = compilation2.EmitDifference(
                 diff1.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f1, f2, GetSyntaxMapFromMarkers(source1, source2), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             ' Synthesized members collection still includes y field since members are only added to it and never deleted.
             ' The corresponding CLR field is also present.
@@ -4379,7 +4379,7 @@ End Class
             Dim diff3 = compilation3.EmitDifference(
                 diff2.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f2, f3, GetSyntaxMapFromMarkers(source2, source3), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f2, f3, GetSyntaxMapFromMarkers(source2, source3), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff3.VerifySynthesizedMembers(
                 "C: {_Closure$__, VB$StateMachine_1_F}",
@@ -4390,7 +4390,7 @@ End Class
             Dim diff4 = compilation4.EmitDifference(
                 diff3.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f3, f4, GetSyntaxMapFromMarkers(source3, source4), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f3, f4, GetSyntaxMapFromMarkers(source3, source4), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff4.VerifySynthesizedMembers(
                 "C: {_Closure$__, VB$StateMachine_1_F}",
@@ -4401,7 +4401,7 @@ End Class
             Dim diff5 = compilation5.EmitDifference(
                 diff4.NextGeneration,
                 ImmutableArray.Create(
-                    New SemanticEdit(SemanticEditKind.Update, f4, f5, GetSyntaxMapFromMarkers(source4, source5), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f4, f5, GetSyntaxMapFromMarkers(source4, source5), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff5.VerifySynthesizedMembers(
                 "C: {_Closure$__, VB$StateMachine_1_F}",
@@ -4450,7 +4450,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_EncUpdateFailedMissingAttribute, "F").WithArguments("Public Function F() As IEnumerable(Of Integer)", "System.Runtime.CompilerServices.IteratorStateMachineAttribute").WithLocation(6, 30))
@@ -4508,7 +4508,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_EncUpdateFailedMissingAttribute, "F").WithArguments("Public Function F() As IEnumerable(Of Integer)", "System.Runtime.CompilerServices.IteratorStateMachineAttribute").WithLocation(12, 30))
@@ -4566,7 +4566,7 @@ End Class
                 generation0,
                 ImmutableArray.Create(
                     New SemanticEdit(SemanticEditKind.Insert, Nothing, ism1),
-                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                    New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify()
         End Sub
@@ -4626,7 +4626,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify()
         End Sub
@@ -4679,7 +4679,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_EncUpdateFailedMissingAttribute, "F").WithArguments("Public Function F() As Task(Of Integer)", "System.Runtime.CompilerServices.AsyncStateMachineAttribute").WithLocation(15, 27))
@@ -4717,7 +4717,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify()
         End Sub
@@ -4756,7 +4756,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_EncUpdateFailedMissingAttribute, "F").WithArguments("Public Function F() As Task(Of Integer)", "System.Runtime.CompilerServices.AsyncStateMachineAttribute").WithLocation(15, 27))
@@ -4795,7 +4795,7 @@ End Class
             Dim generation0 = EmitBaseline.CreateInitialBaseline(md0, AddressOf v0.CreateSymReader().GetEncMethodDebugInfo)
             Dim diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables:=True)))
+                ImmutableArray.Create(New SemanticEdit(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), options:=SemanticEditOptions.PreserveLocalVariables)))
 
             diff1.EmitResult.Diagnostics.Verify(
                 Diagnostic(ERRID.ERR_EncUpdateFailedMissingAttribute, "F").WithArguments("Public Function F() As IEnumerable(Of Integer)", "System.Runtime.CompilerServices.IteratorStateMachineAttribute").WithLocation(5, 30))
