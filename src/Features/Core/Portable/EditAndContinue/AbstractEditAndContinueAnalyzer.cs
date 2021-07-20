@@ -2365,7 +2365,16 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             => oldTypes.SequenceEqual(newTypes, exact, (x, y, exact) => TypesEquivalent(x, y, exact));
 
         protected static bool ParameterTypesEquivalent(IParameterSymbol oldParameter, IParameterSymbol newParameter, bool exact)
-            => (exact ? s_exactSymbolEqualityComparer : s_runtimeSymbolEqualityComparer).ParameterEquivalenceComparer.Equals(oldParameter, newParameter);
+        {
+            if (exact)
+            {
+                return s_exactSymbolEqualityComparer.ParameterEquivalenceComparer.Equals(oldParameter, newParameter);
+            }
+
+            return s_runtimeSymbolEqualityComparer.ParameterEquivalenceComparer.Equals(oldParameter, newParameter) ||
+                oldParameter.IsDiscard ||
+                newParameter.IsDiscard;
+        }
 
         protected static bool TypeParameterConstraintsEquivalent(ITypeParameterSymbol oldParameter, ITypeParameterSymbol newParameter, bool exact)
             => TypesEquivalent(oldParameter.ConstraintTypes, newParameter.ConstraintTypes, exact) &&
