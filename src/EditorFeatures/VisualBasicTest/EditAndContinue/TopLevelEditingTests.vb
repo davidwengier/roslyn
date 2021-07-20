@@ -1822,8 +1822,8 @@ End Class
             edits.VerifySemantics(
                 semanticEdits:=
                 {
-                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.Invoke"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate),
-                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.BeginInvoke"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.Invoke"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate),
+                    SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("D.BeginInvoke"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
                 })
         End Sub
 
@@ -9224,7 +9224,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.M"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.M"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 
@@ -9239,7 +9239,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").InstanceConstructors.Single(), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 
@@ -9254,7 +9254,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("op_Explicit"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("op_Explicit"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 
@@ -9269,7 +9269,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("op_Addition"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember(Of NamedTypeSymbol)("C").GetMember("op_Addition"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 
@@ -9284,7 +9284,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.P"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.P"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 
@@ -9299,7 +9299,7 @@ End Class
 
             edits.VerifySemantics(semanticEdits:=
             {
-                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.M"), options:=SemanticEditOption.EmitAllParametersForMethodUpdate)
+                SemanticEdit(SemanticEditKind.Update, Function(c) c.GetMember("C.M"), options:=SemanticEditOptions.EmitAllParametersForMethodUpdate)
             })
         End Sub
 

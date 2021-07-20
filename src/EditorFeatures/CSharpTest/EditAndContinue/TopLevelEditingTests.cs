@@ -3760,8 +3760,8 @@ record C(int X)
             edits.VerifySemantics(
                new[]
                {
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.Invoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate),
-                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.BeginInvoke"), options: SemanticEditOption.EmitAllParametersForMethodUpdate)
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.Invoke"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate),
+                    SemanticEdit(SemanticEditKind.Update, c => c.GetMember("D.BeginInvoke"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate)
                });
         }
 
@@ -6346,7 +6346,7 @@ class C
             edits.VerifyEdits(
                 "Update [string[] args]@35 -> [string[] b]@35");
 
-            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
@@ -6372,7 +6372,7 @@ class C
                 "Update [int a]@25 -> [int _]@25",
                 "Update [int b]@32 -> [int _]@32");
 
-            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.M"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.M"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
@@ -6396,7 +6396,7 @@ class C
 }";
             var edits = GetTopEdits(src1, src2);
 
-            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.Main"), options: SemanticEditOptions.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]

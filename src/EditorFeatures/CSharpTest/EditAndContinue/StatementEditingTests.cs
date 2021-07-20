@@ -4942,7 +4942,7 @@ class Program
 
             var edits = GetTopEdits(src1, src2);
 
-            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), preserveLocalVariables: true, options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), options: SemanticEditOptions.PreserveLocalVariables | SemanticEditOptions.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
@@ -4957,7 +4957,7 @@ class Program
                 "Update [b]@38 -> [_]@38");
 
             // Techncailly not a discard, but a rename
-            GetTopEdits(edits).VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), preserveLocalVariables: true));
+            GetTopEdits(edits).VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOptions.PreserveLocalVariables));
         }
 
         [Fact]
@@ -4972,7 +4972,7 @@ class Program
                 "Update [int a]@35 -> [_]@35",
                 "Update [int b]@42 -> [_]@38");
 
-            GetTopEdits(edits).VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), preserveLocalVariables: true));
+            GetTopEdits(edits).VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), options: SemanticEditOptions.PreserveLocalVariables));
         }
 
         #endregion
@@ -7015,7 +7015,7 @@ class Program
 
             var edits = GetTopEdits(src1, src2);
 
-            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), preserveLocalVariables: true, options: SemanticEditOption.EmitAllParametersForMethodUpdate));
+            edits.VerifySemantics(SemanticEdit(SemanticEditKind.Update, c => c.GetMember("Program.Main"), options: SemanticEditOptions.PreserveLocalVariables | SemanticEditOptions.EmitAllParametersForMethodUpdate));
         }
 
         [Fact]
