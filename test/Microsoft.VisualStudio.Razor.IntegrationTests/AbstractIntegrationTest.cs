@@ -7,7 +7,7 @@ using Xunit;
 using Xunit.Sdk;
 using Task = System.Threading.Tasks.Task;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test
+namespace Microsoft.VisualStudio.Razor.IntegrationTests
 {
     // TODO: Start collecting LogFiles on failure
 

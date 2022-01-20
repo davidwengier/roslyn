@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Razor.Integration.Test.Extensions;
+using Microsoft.VisualStudio.Razor.IntegrationTests.Extensions;
 
 namespace Microsoft.VisualStudio.Extensibility.Testing
 {
