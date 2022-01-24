@@ -3,7 +3,7 @@
     <TargetFramework>net472</TargetFramework>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.VisualStudio.Razor.Integration.Test</RootNamespace>
+    <RootNamespace>Microsoft.VisualStudio.Razor.IntegrationTests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Microsoft.AspNetCore.Razor.Test.Common\NullableAttributes.cs" Link="NullableAttributes.cs" />

@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Projection;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.Extensions
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.Extensions
 {
     internal static class IBufferGraphExtensions
     {

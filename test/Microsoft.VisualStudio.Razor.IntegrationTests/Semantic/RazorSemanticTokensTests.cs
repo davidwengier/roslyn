@@ -10,12 +10,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.VisualStudio.Razor.Integration.Test.InProcess;
+using Microsoft.VisualStudio.Razor.IntegrationTests.InProcess;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Xunit;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test
+namespace Microsoft.VisualStudio.Razor.IntegrationTests
 {
     [IntializeTestFile]
     public class RazorSemanticTokensTests : AbstractRazorEditorTest

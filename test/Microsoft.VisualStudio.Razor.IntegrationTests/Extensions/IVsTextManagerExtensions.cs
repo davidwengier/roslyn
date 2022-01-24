@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.Extensions
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.Extensions
 {
     internal static class IVsTextManagerExtensions
     {

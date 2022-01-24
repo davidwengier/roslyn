@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Threading;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.InProcess
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.InProcess
 {
     public static class LightBulbHelper
     {

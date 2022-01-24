@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.Extensions
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.Extensions
 {
     internal static class ITextViewExtensions
     {
