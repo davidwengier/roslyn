@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test
+namespace Microsoft.VisualStudio.Razor.IntegrationTests
 {
     public abstract class AbstractEditorTest : AbstractIntegrationTest
     {

@@ -4,7 +4,7 @@
 using System.Reflection;
 using Xunit.Sdk;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test
+namespace Microsoft.VisualStudio.Razor.IntegrationTests
 {
     public class IntializeTestFileAttribute : BeforeAfterTestAttribute
     {

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.Extensions
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.Extensions
 {
     internal static class IVsTextViewExtensions
     {

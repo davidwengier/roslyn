@@ -3,9 +3,9 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Razor.Integration.Test.InProcess;
+using Microsoft.VisualStudio.Razor.IntegrationTests.InProcess;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test
+namespace Microsoft.VisualStudio.Razor.IntegrationTests
 {
     public abstract class AbstractRazorEditorTest : AbstractEditorTest
     {

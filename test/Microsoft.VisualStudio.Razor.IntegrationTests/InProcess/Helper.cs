@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.VisualStudio.Razor.Integration.Test.InProcess
+namespace Microsoft.VisualStudio.Razor.IntegrationTests.InProcess
 {
     internal static class Helper
     {
