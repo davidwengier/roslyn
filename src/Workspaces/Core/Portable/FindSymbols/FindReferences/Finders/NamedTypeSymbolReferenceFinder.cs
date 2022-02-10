@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.LanguageServices;
@@ -107,6 +108,52 @@ namespace Microsoft.CodeAnalysis.FindSymbols.Finders
             return
                 syntaxFacts.TryGetPredefinedType(token, out var actualType) &&
                 predefinedType == actualType;
+        }
+
+        public override ValueTask<ImmutableArray<ReferenceLocation>> FindReferencesInMetadataAsync(ISymbol symbol, PortableExecutableReference reference, FindReferencesSearchOptions options, CancellationToken cancellationToken)
+        {
+            var metadata = reference.GetMetadata();
+
+            if (metadata is AssemblyMetadata assembly)
+            {
+                foreach (var module in assembly.GetModules())
+                {
+                    return ProcessModule(module);
+                }
+            }
+            else if (metadata is ModuleMetadata module)
+            {
+                return ProcessModule(module);
+            }
+
+            return base.FindReferencesInMetadataAsync(symbol, reference, options, cancellationToken);
+
+            ValueTask<ImmutableArray<ReferenceLocation>> ProcessModule(ModuleMetadata module)
+            {
+                var reader = module.GetMetadataReader();
+
+                if (!module.Name.Equals("System.IO.Compression.ZipFile.dll"))
+                {
+                    return base.FindReferencesInMetadataAsync(symbol, reference, options, cancellationToken);
+                }
+
+                foreach (var typeRef in reader.TypeReferences)
+                {
+                    if (MetadataTokens.GetToken(typeRef) == symbol.MetadataToken)
+                    {
+                        return new(ImmutableArray.Create(
+                            new ReferenceLocation(
+                                null!, null!,
+                                location: Location.Create("goo.cs", default, default),
+                                isImplicit: false,
+                                new SymbolUsageInfo(null!, null),
+                                ImmutableDictionary<string, string>.Empty,
+                                CandidateReason.None)));
+                    }
+                }
+
+                return base.FindReferencesInMetadataAsync(symbol, reference, options, cancellationToken);
+            }
         }
 
         protected override async ValueTask<ImmutableArray<FinderLocation>> FindReferencesInDocumentAsync(

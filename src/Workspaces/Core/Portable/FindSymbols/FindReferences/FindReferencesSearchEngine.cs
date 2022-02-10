@@ -193,6 +193,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
                     }
                 }
 
+                using var _4 = PooledHashSet<PortableExecutableReference>.GetInstance(out var referencesToSearch);
+
                 foreach (var symbol in allSymbols)
                 {
                     var globalAliases = TryGet(symbolToGlobalAliases, symbol);
@@ -207,6 +209,18 @@ namespace Microsoft.CodeAnalysis.FindSymbols
                             var docSymbols = Get(documentToSymbols, document);
                             docSymbols.Add(symbol);
                         }
+
+                        // Should we determine references to search first?
+                        // eg, for NamedTypeSymbol, check the TypeRef table to see if anything uses it
+                        //     for MethodSymbol, check the MethodRef table
+                        // Not sure that would save anything...
+                        foreach (var reference in project.MetadataReferences)
+                        {
+                            if (reference is PortableExecutableReference peRef)
+                            {
+                                referencesToSearch.Add(peRef);
+                            }
+                        }
                     }
                 }
 
@@ -215,6 +229,12 @@ namespace Microsoft.CodeAnalysis.FindSymbols
                 {
                     tasks.Add(CreateWorkAsync(() => ProcessDocumentAsync(
                         document, docSymbols, symbolToGlobalAliases, cancellationToken), cancellationToken));
+                }
+
+                foreach (var reference in referencesToSearch)
+                {
+                    tasks.Add(CreateWorkAsync(() => ProcessMetadataReferenceAsync(
+                        reference, allSymbols, cancellationToken), cancellationToken));
                 }
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -245,6 +265,26 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         private static PooledHashSet<U>? TryGet<T, U>(Dictionary<T, PooledHashSet<U>> dictionary, T key) where T : notnull
             => dictionary.TryGetValue(key, out var set) ? set : null;
 
+        private async Task ProcessMetadataReferenceAsync(
+            PortableExecutableReference reference, ImmutableArray<ISymbol> symbols, CancellationToken cancellationToken)
+        {
+            foreach (var symbol in symbols)
+            {
+                using (Logger.LogBlock(FunctionId.FindReference_ProcessMetadataReferenceAsync, cancellationToken))
+                {
+                    // This is safe to just blindly read. We can only ever get here after the call to ReportGroupsAsync
+                    // happened.  So tehre must be a group for this symbol in our map.
+                    var group = _symbolToGroup[symbol];
+                    foreach (var finder in _finders)
+                    {
+                        var references = await finder.FindReferencesInMetadataAsync(
+                            symbol, reference, _options, cancellationToken).ConfigureAwait(false);
+                        foreach (var location in references)
+                            await _progress.OnReferenceFoundAsync(group, symbol, location, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
         private async Task ProcessDocumentAsync(
             Document document, HashSet<ISymbol> symbols,
             Dictionary<ISymbol, PooledHashSet<string>> symbolToGlobalAliases,

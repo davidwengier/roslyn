@@ -65,5 +65,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols.Finders
             ISymbol symbol, HashSet<string>? globalAliases,
             Document document, SemanticModel semanticModel,
             FindReferencesSearchOptions options, CancellationToken cancellationToken);
+
+        ValueTask<ImmutableArray<ReferenceLocation>> FindReferencesInMetadataAsync(
+            ISymbol symbol, PortableExecutableReference reference,
+            FindReferencesSearchOptions options, CancellationToken cancellationToken);
     }
 }

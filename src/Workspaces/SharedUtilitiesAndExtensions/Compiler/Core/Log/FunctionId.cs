@@ -539,5 +539,7 @@ namespace Microsoft.CodeAnalysis.Internal.Log
         NavigateToExternalSources = 531,
 
         StackTraceToolWindow_ShowOnActivated = 540,
+
+        FindReference_ProcessMetadataReferenceAsync = 550,
     }
 }

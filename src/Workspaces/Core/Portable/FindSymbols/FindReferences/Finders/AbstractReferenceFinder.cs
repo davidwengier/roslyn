@@ -38,6 +38,12 @@ namespace Microsoft.CodeAnalysis.FindSymbols.Finders
         public abstract ValueTask<ImmutableArray<FinderLocation>> FindReferencesInDocumentAsync(
             ISymbol symbol, HashSet<string>? globalAliases, Document document, SemanticModel semanticModel, FindReferencesSearchOptions options, CancellationToken cancellationToken);
 
+        public virtual ValueTask<ImmutableArray<ReferenceLocation>> FindReferencesInMetadataAsync(
+            ISymbol symbol, PortableExecutableReference reference, FindReferencesSearchOptions options, CancellationToken cancellationToken)
+        {
+            return new(ImmutableArray<ReferenceLocation>.Empty);
+        }
+
         protected static bool TryGetNameWithoutAttributeSuffix(
             string name,
             ISyntaxFactsService syntaxFacts,
