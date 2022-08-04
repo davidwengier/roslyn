@@ -5646,8 +5646,8 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             // signature validation:
             if (!ParameterTypesEquivalent(oldLambdaSymbol.Parameters, newLambdaSymbol.Parameters, exact: false))
             {
-                ReportUpdateRudeEdit(diagnostics, RudeEditKind.ChangingLambdaParameters, newLambda);
-                hasSignatureErrors = true;
+                //ReportUpdateRudeEdit(diagnostics, RudeEditKind.ChangingLambdaParameters, newLambda);
+                //hasSignatureErrors = true;
             }
             else if (!ReturnTypesEquivalent(oldLambdaSymbol, newLambdaSymbol, exact: false))
             {

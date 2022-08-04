@@ -1261,6 +1261,28 @@ void G6(int a)
             expected.AssertEqual(actual);
         }
 
+        [Fact]
+        public void LocalFunctions6ParameterTypes()
+        {
+            var src1 = @"void M() { void L(int x) => x.ToString(); }";
+            var src2 = @"void M() { void L(long x) => x.ToString(); }";
+
+            var matches = GetMethodMatches(src1, src2);
+            var actual = ToMatchingPairs(matches);
+
+            var expected = new MatchingPairs
+            {
+                { "int f() { return local(); int local() => 2; }", "int f() { return local(); int local() { return 1; }}" },
+                { "()", "()" },
+                { "{ return local(); int local() => 2; }", "{ return local(); int local() { return 1; }}" },
+                { "return local();", "return local();" },
+                { "int local() => 2;", "int local() { return 1; }" },
+                { "()", "()" },
+            };
+
+            expected.AssertEqual(actual);
+        }
+
         #endregion
 
         #region LINQ
