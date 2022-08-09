@@ -11,11 +11,11 @@ using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using Microsoft.Cci;
-using Microsoft.CodeAnalysis.PooledObjects;
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
-using Microsoft.CodeAnalysis.Symbols;
 using Microsoft.CodeAnalysis.Emit.EditAndContinue;
+using Microsoft.CodeAnalysis.PooledObjects;
+using Microsoft.CodeAnalysis.Symbols;
+using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Emit
 {
@@ -580,6 +580,22 @@ namespace Microsoft.CodeAnalysis.Emit
                 foreach (var methodDef in deletedMethods)
                 {
                     var oldMethodDef = (IMethodDefinition)methodDef.GetCciAdapter();
+                    if (module.GetAllSynthesizedMembers().TryGetValue(typeDef.GetInternalSymbol(), out var synthesized))
+                    {
+                        foreach (var method in synthesized)
+                        {
+                            var synthesizedMethodDef = (IMethodDefinition)method.GetCciAdapter();
+                            var x = TryGetExistingMethodDefIndex(oldMethodDef, out _);
+                            if (method is ISynthesizedMethodBodyImplementationSymbol synth &&
+                                synth.BaseMethod is not null &&
+                                synth.BaseMethod.Name.Equals(oldMethodDef.Name) &&
+                                synth.BaseMethod != oldMethodDef.GetInternalSymbol())
+                            {
+                                // oldMethodDef = Some how find the actual synthesized method for oldMethodDef??
+                            }
+                        }
+                    }
+
                     deletedTypeMembers.Add(new DeletedMethodDefinition(oldMethodDef, typeDef, _typesUsedByDeletedMembers));
                 }
 

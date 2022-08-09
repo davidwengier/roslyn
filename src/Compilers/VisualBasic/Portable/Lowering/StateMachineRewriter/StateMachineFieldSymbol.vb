@@ -97,6 +97,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
                 Return symbol.Method
             End Get
         End Property
+
+        Public ReadOnly Property BaseMethod As IMethodSymbolInternal Implements ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+            Get
+                Return Nothing
+            End Get
+        End Property
     End Class
 
 End Namespace

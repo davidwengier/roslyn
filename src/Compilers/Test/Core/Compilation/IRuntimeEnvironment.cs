@@ -258,19 +258,19 @@ namespace Roslyn.Test.Utilities
             try
             {
                 result = compilation.Emit(
-                    executableStream,
-                    metadataPEStream: null,
-                    pdbStream: pdbStream,
-                    xmlDocumentationStream: null,
-                    win32Resources: null,
-                    manifestResources: manifestResources,
-                    options: emitOptions,
-                    debugEntryPoint: null,
-                    sourceLinkStream: null,
-                    embeddedTexts,
-                    rebuildData: null,
-                    testData: testData,
-                    cancellationToken: default);
+                   executableStream,
+                   metadataPEStream: null,
+                   pdbStream: pdbStream,
+                   xmlDocumentationStream: null,
+                   win32Resources: null,
+                   manifestResources: manifestResources,
+                   options: emitOptions,
+                   debugEntryPoint: null,
+                   sourceLinkStream: null,
+                   embeddedTexts,
+                   rebuildData: null,
+                   testData: testData,
+                   cancellationToken: default);
             }
             finally
             {

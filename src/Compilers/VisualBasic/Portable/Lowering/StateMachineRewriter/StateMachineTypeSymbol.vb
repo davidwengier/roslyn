@@ -53,6 +53,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
             End Get
         End Property
 
+        Public ReadOnly Property BaseMethod As IMethodSymbolInternal Implements ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+            Get
+                Return Nothing
+            End Get
+        End Property
+
         Friend NotOverridable Overrides ReadOnly Property IsInterface As Boolean
             Get
                 Return False

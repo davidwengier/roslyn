@@ -25,5 +25,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             get { return false; }
         }
+
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
+        }
     }
 }

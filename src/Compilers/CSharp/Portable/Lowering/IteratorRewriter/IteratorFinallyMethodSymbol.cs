@@ -4,7 +4,6 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -244,6 +243,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.Method
         {
             get { return _stateMachineType.KickoffMethod; }
+        }
+
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
         }
 
         bool ISynthesizedMethodBodyImplementationSymbol.HasMethodBodyDependency

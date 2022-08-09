@@ -141,6 +141,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.Method => _topLevelMethod;
 
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod => null;
+
         internal override bool IsRecord => false;
         internal override bool IsRecordStruct => false;
         internal override bool HasPossibleWellKnownCloneMethod() => false;

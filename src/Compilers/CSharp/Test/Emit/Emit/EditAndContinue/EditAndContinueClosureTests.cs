@@ -4590,7 +4590,7 @@ class C
 {
     void F()
     {
-        <N:0>void L(int x) => x.ToString();</N:0>
+        <N:0>void L(int x) => <L:0>x.ToString();</L:0></N:0>
     }
 }");
             var source1 = MarkedSource(@"
@@ -4600,7 +4600,7 @@ class C
 {
     void F()
     {
-        <N:0>void L(long x) => x.ToString();</N:0>
+        <N:0>void L(long x) => <L:0>x.ToString();</L:0></N:0>
     }
 }");
             var source2 = MarkedSource(@"
@@ -4610,7 +4610,7 @@ class C
 {
     void F()
     {
-        <N:0>void L(int x) => (x + 1).ToString();</N:0>
+        <N:0>void L(int x) => <L:0>(x + 1).ToString();</L:0></N:0>
     }
 }");
             var compilation0 = CreateCompilation(source0.Tree, options: ComSafeDebugDll.WithMetadataImportOptions(MetadataImportOptions.All));
@@ -4624,11 +4624,17 @@ class C
             var f1 = compilation1.GetMember<MethodSymbol>("C.F");
             var f2 = compilation2.GetMember<MethodSymbol>("C.F");
 
+            var local0 = compilation0.GetLambdaSymbol(source0, 0);
+            var local1 = compilation1.GetLambdaSymbol(source1, 0);
+            var local2 = compilation2.GetLambdaSymbol(source2, 0);
+
             var generation0 = EmitBaseline.CreateInitialBaseline(md0, v0.CreateSymReader().GetEncMethodDebugInfo);
 
             var diff1 = compilation1.EmitDifference(
                 generation0,
-                ImmutableArray.Create(SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
+                ImmutableArray.Create(
+                    SemanticEdit.Create(SemanticEditKind.Delete, local0, f1.ContainingType),
+                    SemanticEdit.Create(SemanticEditKind.Update, f0, f1, GetSyntaxMapFromMarkers(source0, source1), preserveLocalVariables: true)));
 
             // this is actually a new synthesized member, even though it doesn't have #1 in the name, because the syntax matches
             // the EncLog shows it though

@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.CSharp.Symbols;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.Symbols;
 using Roslyn.Utilities;
 
@@ -48,6 +47,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.Method
         {
             get { return _topLevelMethod; }
+        }
+
+        IMethodSymbolInternal? ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
         }
     }
 }

@@ -50,6 +50,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return KickoffMethod; }
         }
 
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
+        }
+
         public sealed override ImmutableArray<CSharpAttributeData> GetAttributes()
         {
             if (_attributes.IsDefault)

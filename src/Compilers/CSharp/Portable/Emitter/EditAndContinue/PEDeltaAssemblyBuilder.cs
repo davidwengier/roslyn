@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.PooledObjects;
-using Microsoft.CodeAnalysis.Symbols;
 using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.CSharp.Emit
@@ -128,6 +127,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             var metadataAnonymousDelegates = GetAnonymousDelegateMapFromMetadata(originalMetadata.MetadataReader, metadataDecoder);
             var metadataSymbols = new EmitBaseline.MetadataSymbols(metadataAnonymousTypes, metadataAnonymousDelegates, metadataAnonymousDelegatesWithFixedTypes, metadataDecoder, assemblyReferenceIdentityMap);
 
+            var lambdasAndLocalFunctions = GetLambdaMapFromMetadata(originalMetadata.MetadataReader, metadataDecoder);
+
             return InterlockedOperations.Initialize(ref initialBaseline.LazyMetadataSymbols, metadataSymbols);
         }
 
@@ -191,6 +192,48 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
 
             anonymousTypes = types;
             anonymousDelegatesWithFixedTypes = delegates;
+        }
+
+        // internal for testing
+        internal static IReadOnlyDictionary<SynthesizedDelegateKey, SynthesizedDelegateValue> GetLambdaMapFromMetadata(MetadataReader reader, MetadataDecoder metadataDecoder)
+        {
+            var result = new Dictionary<SynthesizedDelegateKey, SynthesizedDelegateValue>();
+            foreach (var handle in reader.TypeDefinitions)
+            {
+                var def = reader.GetTypeDefinition(handle);
+                if (!def.Namespace.IsNil)
+                {
+                    continue;
+                }
+
+                foreach (var method in def.GetMethods())
+                {
+                    var methodDef = reader.GetMethodDefinition(method);
+
+                    var name = reader.GetString(methodDef.Name);
+                    if (name.StartsWith("<"))
+                    {
+                        var type = (NamedTypeSymbol)metadataDecoder.GetTypeOfToken(handle);
+                        var symbol = metadataDecoder.GetMethodSymbolForMethodDefOrMemberRef(method, type);
+                    }
+                }
+                //if (!reader.StringComparer.StartsWith(def.Name, GeneratedNames.ActionDelegateNamePrefix) &&
+                //    !reader.StringComparer.StartsWith(def.Name, GeneratedNames.FuncDelegateNamePrefix))
+                //{
+                //    continue;
+                //}
+
+                //// The name of a synthesized delegate neatly encodes everything we need to identify it, either
+                //// in the prefix (return void or not) or the name (ref kinds and arity) so we don't need anything
+                //// fancy for a key.
+                //var metadataName = reader.GetString(def.Name);
+                //var key = new SynthesizedDelegateKey(metadataName);
+
+                //var type = (NamedTypeSymbol)metadataDecoder.GetTypeOfToken(handle);
+                //var value = new SynthesizedDelegateValue(type.GetCciAdapter());
+                //result.Add(key, value);
+            }
+            return result;
         }
 
         // internal for testing

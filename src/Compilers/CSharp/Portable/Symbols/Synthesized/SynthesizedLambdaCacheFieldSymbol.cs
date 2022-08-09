@@ -29,6 +29,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.Method => _topLevelMethod;
 
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod => null;
+
         // When the containing top-level method body is updated we don't need to attempt to update the cache field
         // since a field update is a no-op.
         bool ISynthesizedMethodBodyImplementationSymbol.HasMethodBodyDependency => false;

@@ -24,5 +24,10 @@ namespace Microsoft.CodeAnalysis.Symbols
         /// False if <see cref="Method"/> is null.
         /// </summary>
         bool HasMethodBodyDependency { get; }
+
+        /// <summary>
+        /// The symbol
+        /// </summary>
+        IMethodSymbolInternal? BaseMethod { get; }
     }
 }

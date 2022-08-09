@@ -925,6 +925,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             [Out] ImmutableArray<ActiveStatement>.Builder newActiveStatements,
             [Out] ImmutableArray<ImmutableArray<SourceFileSpan>>.Builder newExceptionRegions,
             [Out] ArrayBuilder<RudeEditDiagnostic> diagnostics,
+            [Out] ArrayBuilder<SemanticEditInfo> semanticEdits,
             out Func<SyntaxNode, SyntaxNode?>? syntaxMap,
             CancellationToken cancellationToken)
         {
@@ -1044,6 +1045,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                     map,
                     capabilities,
                     diagnostics,
+                    semanticEdits,
                     out var newBodyHasLambdas,
                     cancellationToken);
 
@@ -2814,6 +2816,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                                                     newActiveStatements,
                                                     newExceptionRegions,
                                                     diagnostics,
+                                                    semanticEdits,
                                                     out syntaxMap,
                                                     cancellationToken);
                                             }
@@ -3017,6 +3020,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                                             newActiveStatements,
                                             newExceptionRegions,
                                             diagnostics,
+                                            semanticEdits,
                                             out syntaxMap,
                                             cancellationToken);
                                     }
@@ -4904,6 +4908,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             BidirectionalMap<SyntaxNode> map,
             EditAndContinueCapabilitiesGrantor capabilities,
             ArrayBuilder<RudeEditDiagnostic> diagnostics,
+            ArrayBuilder<SemanticEditInfo> semanticEdits,
             out bool syntaxMapRequired,
             CancellationToken cancellationToken)
         {
@@ -4921,7 +4926,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
                         return;
                     }
 
-                    ReportLambdaSignatureRudeEdits(diagnostics, oldModel, oldLambdaBody, newModel, newLambdaInfo.NewBody, capabilities, out var hasErrors, cancellationToken);
+                    ReportLambdaSignatureRudeEdits(diagnostics, semanticEdits, oldModel, oldLambdaBody, newModel, newLambdaInfo.NewBody, capabilities, out var hasErrors, cancellationToken);
                     anySignatureErrors |= hasErrors;
                 }
 
@@ -5612,6 +5617,7 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
 
         private void ReportLambdaSignatureRudeEdits(
             ArrayBuilder<RudeEditDiagnostic> diagnostics,
+            ArrayBuilder<SemanticEditInfo> semanticEdits,
             SemanticModel oldModel,
             SyntaxNode oldLambdaBody,
             SemanticModel newModel,
@@ -5646,6 +5652,9 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
             // signature validation:
             if (!ParameterTypesEquivalent(oldLambdaSymbol.Parameters, newLambdaSymbol.Parameters, exact: false))
             {
+                var containingSymbolKey = SymbolKey.Create(newLambdaSymbol.ContainingType, cancellationToken);
+                var oldSymbolKey = SymbolKey.Create(oldLambdaSymbol, cancellationToken);
+                semanticEdits.Add(new SemanticEditInfo(SemanticEditKind.Delete, oldSymbolKey, null, null, null, containingSymbolKey));
                 //ReportUpdateRudeEdit(diagnostics, RudeEditKind.ChangingLambdaParameters, newLambda);
                 //hasSignatureErrors = true;
             }

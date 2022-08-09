@@ -4,7 +4,6 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -22,7 +21,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     /// </summary>
     internal abstract class SynthesizedMethodBaseSymbol : SourceMemberMethodSymbol
     {
-        protected readonly MethodSymbol BaseMethod;
+        internal readonly MethodSymbol BaseMethod;
         internal TypeMap TypeMap { get; private set; }
 
         private readonly string _name;

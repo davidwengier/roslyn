@@ -4,7 +4,6 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Emit;
@@ -46,6 +45,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.Method
         {
             get { return StateMachineType.KickoffMethod; }
+        }
+
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
         }
 
         internal override int CalculateLocalSyntaxOffset(int localPosition, SyntaxTree localTree)

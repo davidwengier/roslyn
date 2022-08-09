@@ -78,6 +78,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return ((ISynthesizedMethodBodyImplementationSymbol)ContainingSymbol).Method; }
         }
 
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
+        }
+
         internal override bool IsCapturedFrame
         {
             get { return _isThis; }

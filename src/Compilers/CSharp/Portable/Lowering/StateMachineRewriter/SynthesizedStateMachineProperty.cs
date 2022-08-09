@@ -4,7 +4,6 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Symbols;
 
@@ -169,5 +168,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get { return ((ISynthesizedMethodBodyImplementationSymbol)ContainingSymbol).Method; }
         }
+
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get { return null; }
+        }
+
     }
 }

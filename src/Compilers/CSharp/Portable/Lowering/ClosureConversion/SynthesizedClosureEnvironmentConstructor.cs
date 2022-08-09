@@ -21,6 +21,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return ((ISynthesizedMethodBodyImplementationSymbol)this.ContainingSymbol).Method; }
         }
 
+        IMethodSymbolInternal ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+        {
+            get
+            {
+                return null;
+            }
+        }
+
         bool ISynthesizedMethodBodyImplementationSymbol.HasMethodBodyDependency
         {
             get { return false; }

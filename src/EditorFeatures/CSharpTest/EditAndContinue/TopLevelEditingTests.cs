@@ -7080,6 +7080,41 @@ class C
         }
 
         [Fact]
+        public void MethodWithLambda_Delete()
+        {
+            var src1 = @"
+using System;
+
+class C
+{
+    static void F()
+    {
+        Func<int> a = () => { <N:0.0>return 1;</N:0.0> };
+        Func<Func<int>> b = () => () => { <N:0.1>return 1;</N:0.1> };
+    }
+}
+";
+            var src2 = @"
+using System;
+
+class C
+{
+    static void F()
+    {
+        Func<int> a = () => { <N:0.0>return 1;</N:0.0> };
+
+        Console.WriteLine(1);
+    }
+}";
+            var edits = GetTopEdits(src1, src2);
+            var syntaxMap = GetSyntaxMap(src1, src2);
+
+            edits.VerifySemantics(
+                ActiveStatementsDescription.Empty,
+                new[] { SemanticEdit(SemanticEditKind.Update, c => c.GetMember("C.F"), syntaxMap[0]) });
+        }
+
+        [Fact]
         public void MethodUpdate_LocalVariableDeclaration()
         {
             var src1 = @"

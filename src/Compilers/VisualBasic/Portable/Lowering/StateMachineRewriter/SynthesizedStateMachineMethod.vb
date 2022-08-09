@@ -172,6 +172,12 @@ Namespace Microsoft.CodeAnalysis.VisualBasic
                 Return StateMachineType.KickoffMethod
             End Get
         End Property
+
+        Public ReadOnly Property BaseMethod As IMethodSymbolInternal Implements ISynthesizedMethodBodyImplementationSymbol.BaseMethod
+            Get
+                Return Nothing
+            End Get
+        End Property
     End Class
 
     ''' <summary>

@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp.Test.Utilities;
 using Microsoft.CodeAnalysis.CSharp.UnitTests;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Symbols;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Microsoft.Metadata.Tools;
 using Roslyn.Test.Utilities;
@@ -288,6 +289,13 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue.UnitTests
         internal static CSharpCompilation WithSource(this CSharpCompilation compilation, SyntaxTree[] newTrees)
         {
             return compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(newTrees);
+        }
+
+        internal static ISymbolInternal GetLambdaSymbol(this CSharpCompilation compilation, SourceWithMarkedNodes source, int index)
+        {
+            var model = compilation.GetSemanticModel(source.Tree, ignoreAccessibility: false);
+            SourceWithMarkedNodes.MarkedSpan span = source.MarkedSpans.Where(s => s.TagName == "L").Skip(index).First();
+            return model.GetEnclosingSymbol(span.MarkedSyntax.Start).GetSymbol<MethodSymbol>();
         }
     }
 }
