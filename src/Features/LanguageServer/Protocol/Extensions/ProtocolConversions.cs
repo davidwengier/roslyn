@@ -150,7 +150,7 @@ namespace Microsoft.CodeAnalysis.LanguageServer
             if (filePath is null)
                 throw new ArgumentNullException(nameof(filePath));
 
-            return new Uri(filePath, UriKind.Absolute);
+            return new Uri(filePath);
         }
 
         public static Uri GetUriFromPartialFilePath(string? filePath)
