@@ -21,6 +21,9 @@ internal class RazorDynamicFileInfoProvider : IDynamicFileInfoProvider
     [DataContract]
     private class ProvideDynamicFileParams
     {
+        [DataMember(Name = "intermediateOutputPath")]
+        public required string? IntermediateOutputPath { get; set; }
+
         [DataMember(Name = "razorFiles")]
         public required Uri[] RazorFiles { get; set; }
     }
@@ -46,19 +49,31 @@ internal class RazorDynamicFileInfoProvider : IDynamicFileInfoProvider
 #pragma warning restore CS0067
 
     private readonly Lazy<RazorWorkspaceListenerInitializer> _razorWorkspaceListenerInitializer;
+    private readonly Lazy<LanguageServerWorkspaceFactory> _workspaceFactory;
 
     [ImportingConstructor]
     [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-    public RazorDynamicFileInfoProvider(Lazy<RazorWorkspaceListenerInitializer> razorWorkspaceListenerInitializer)
+    public RazorDynamicFileInfoProvider(
+        Lazy<RazorWorkspaceListenerInitializer> razorWorkspaceListenerInitializer,
+        Lazy<LanguageServerWorkspaceFactory> workspaceFactory)
     {
         _razorWorkspaceListenerInitializer = razorWorkspaceListenerInitializer;
+        _workspaceFactory = workspaceFactory;
     }
 
     public async Task<DynamicFileInfo?> GetDynamicFileInfoAsync(ProjectId projectId, string? projectFilePath, string filePath, CancellationToken cancellationToken)
     {
         _razorWorkspaceListenerInitializer.Value.NotifyDynamicFile(projectId);
 
-        var requestParams = new ProvideDynamicFileParams { RazorFiles = new[] { ProtocolConversions.CreateAbsoluteUri(filePath) } };
+        var workspace = _workspaceFactory.Value.Workspace;
+        var project = workspace.CurrentSolution.GetProject(projectId);
+        Contract.ThrowIfNull(project);
+
+        var requestParams = new ProvideDynamicFileParams
+        {
+            IntermediateOutputPath = Path.GetDirectoryName(project.CompilationOutputInfo.AssemblyPath),
+            RazorFiles = new[] { ProtocolConversions.CreateAbsoluteUri(filePath) }
+        };
 
         Contract.ThrowIfNull(LanguageServerHost.Instance, "We don't have an LSP channel yet to send this request through.");
         var clientLanguageServerManager = LanguageServerHost.Instance.GetRequiredLspService<IClientLanguageServerManager>();
