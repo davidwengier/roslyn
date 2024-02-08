@@ -360,12 +360,17 @@ namespace Microsoft.VisualStudio.LanguageServices.FindUsages
                 var sourceText = await document.GetValueTextAsync(cancellationToken).ConfigureAwait(false);
                 var (excerptResult, lineText) = await ExcerptAsync(sourceText, documentSpan, classifiedSpans, options, cancellationToken).ConfigureAwait(false);
 
-                var mappedDocumentSpan = await AbstractDocumentSpanEntry.TryMapAndGetFirstAsync(documentSpan, sourceText, cancellationToken).ConfigureAwait(false);
-                if (mappedDocumentSpan == null)
+                var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+                var node = root!.FindNode(documentSpan.SourceSpan);
+                var mappedLocation = node.GetLocation().GetMappedLineSpan();
+                if (!mappedLocation.IsValid)
                 {
                     // this will be removed from the result
                     return null;
                 }
+
+                // Note: The last parameter here is not correct, but DocumentSpanEntry doesn't seem to use it 🤷‍
+                var mappedDocumentSpan = new MappedSpanResult(mappedLocation.Path, mappedLocation.Span, documentSpan.SourceSpan);
 
                 var (guid, projectName, projectFlavor) = GetGuidAndProjectInfo(document);
 
@@ -378,7 +383,7 @@ namespace Microsoft.VisualStudio.LanguageServices.FindUsages
                     document.FilePath,
                     documentSpan.SourceSpan,
                     spanKind,
-                    mappedDocumentSpan.Value,
+                    mappedDocumentSpan,
                     excerptResult,
                     lineText,
                     symbolUsageInfo,
