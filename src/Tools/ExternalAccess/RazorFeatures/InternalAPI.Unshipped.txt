@@ -1,0 +1,3 @@
+#nullable enable
+Microsoft.CodeAnalysis.ExternalAccess.Razor.Features.Handlers.SemanticTokensRange
+static Microsoft.CodeAnalysis.ExternalAccess.Razor.Features.Handlers.SemanticTokensRange.GetSemanticTokensAsync(bool supportsVisualStudioExtensions, Microsoft.CodeAnalysis.Document! document, System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Text.LinePositionSpan> spans, Microsoft.CodeAnalysis.Classification.ClassificationOptions options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int[]!>!
