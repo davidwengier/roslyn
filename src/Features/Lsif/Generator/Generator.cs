@@ -482,9 +482,9 @@ namespace Microsoft.CodeAnalysis.LanguageServerIndexFormat.Generator
             // include syntax tokens in the generated data.
             var data = await SemanticTokensHelpers.ComputeSemanticTokensDataAsync(
                 // Just get the pure-lsp semantic tokens here.
-                new VSInternalClientCapabilities { SupportsVisualStudioExtensions = true },
+                supportsVisualStudioExtensions: true,
                 document,
-                ranges: null,
+                spans: [],
                 options: Classification.ClassificationOptions.Default,
                 cancellationToken: CancellationToken.None);
 
