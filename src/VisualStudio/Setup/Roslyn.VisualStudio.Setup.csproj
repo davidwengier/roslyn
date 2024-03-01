@@ -92,6 +92,12 @@
       <ForceIncludeInVSIX>true</ForceIncludeInVSIX>
       <PkgDefEntry>BindingRedirect</PkgDefEntry>
     </ProjectReference>
+    <ProjectReference Include="..\..\Tools\ExternalAccess\RazorFeatures\Microsoft.CodeAnalysis.ExternalAccess.Razor.Features.csproj">
+      <Name>Microsoft.CodeAnalysis.ExternalAccess.Razor</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup</IncludeOutputGroupsInVSIX>
+      <ForceIncludeInVSIX>true</ForceIncludeInVSIX>
+      <PkgDefEntry>BindingRedirect</PkgDefEntry>
+    </ProjectReference>
     <ProjectReference Include="..\..\Workspaces\Core\Desktop\Microsoft.CodeAnalysis.Workspaces.Desktop.csproj">
       <Name>Workspaces.Desktop</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup;SatelliteDllsProjectOutputGroup</IncludeOutputGroupsInVSIX>

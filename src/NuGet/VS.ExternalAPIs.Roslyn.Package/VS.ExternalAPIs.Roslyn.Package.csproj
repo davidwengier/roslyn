@@ -48,6 +48,7 @@
     <ProjectReference Include="..\..\Tools\ExternalAccess\AspNetCore\Microsoft.CodeAnalysis.ExternalAccess.AspNetCore.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\..\Tools\ExternalAccess\FSharp\Microsoft.CodeAnalysis.ExternalAccess.FSharp.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\..\Tools\ExternalAccess\Razor\Microsoft.CodeAnalysis.ExternalAccess.Razor.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\..\Tools\ExternalAccess\RazorFeatures\Microsoft.CodeAnalysis.ExternalAccess.Razor.Features.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\..\VisualStudio\LiveShare\Impl\Microsoft.VisualStudio.LanguageServices.LiveShare.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\..\Workspaces\Core\Portable\Microsoft.CodeAnalysis.Workspaces.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\..\Workspaces\Core\Desktop\Microsoft.CodeAnalysis.Workspaces.Desktop.csproj" PrivateAssets="all" />
