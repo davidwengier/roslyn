@@ -32,7 +32,8 @@ internal abstract partial class AbstractInProcLanguageClient(
     ILspServiceLoggerFactory lspLoggerFactory,
     IThreadingContext threadingContext,
     ExportProvider exportProvider,
-    AbstractLanguageClientMiddleLayer? middleLayer = null) : ILanguageClient, ILanguageServerFactory, ICapabilitiesProvider, ILanguageClientCustomMessage2
+    AbstractLanguageClientMiddleLayer? middleLayer = null,
+    object? customMessageTarget = null) : ILanguageClient, ILanguageServerFactory, ICapabilitiesProvider, ILanguageClientCustomMessage2
 {
     private readonly IThreadingContext _threadingContext = threadingContext;
     private readonly ILanguageClientMiddleLayer? _middleLayer = middleLayer;
@@ -62,10 +63,9 @@ internal abstract partial class AbstractInProcLanguageClient(
     public object? MiddleLayer => _middleLayer;
 
     /// <summary>
-    /// Unused, implementing <see cref="ILanguageClientCustomMessage2"/>.
     /// Gets the optional target object for receiving custom messages not covered by the language server protocol.
     /// </summary>
-    public virtual object? CustomMessageTarget => null;
+    public virtual object? CustomMessageTarget => customMessageTarget;
 
     /// <summary>
     /// An enum representing this server instance.
