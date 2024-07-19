@@ -18,23 +18,23 @@ using Microsoft.CodeAnalysis.Razor.Workspaces;
 
 namespace Microsoft.VisualStudio.Razor.Remote;
 
-[Export(typeof(IRemoteServiceProvider))]
+[Export(typeof(IRemoteServiceInvoker))]
 [method: ImportingConstructor]
-internal sealed class RemoteServiceProvider(
+internal sealed class RemoteServiceInvoker(
     IWorkspaceProvider workspaceProvider,
     LanguageServerFeatureOptions languageServerFeatureOptions,
     IClientCapabilitiesService clientCapabilitiesService,
     ISemanticTokensLegendService semanticTokensLegendService,
     ITelemetryReporter telemetryReporter,
     ILoggerFactory loggerFactory)
-    : IRemoteServiceProvider
+    : IRemoteServiceInvoker
 {
     private readonly IWorkspaceProvider _workspaceProvider = workspaceProvider;
     private readonly LanguageServerFeatureOptions _languageServerFeatureOptions = languageServerFeatureOptions;
     private readonly IClientCapabilitiesService _clientCapabilitiesService = clientCapabilitiesService;
     private readonly ISemanticTokensLegendService _semanticTokensLegendService = semanticTokensLegendService;
     private readonly ITelemetryReporter _telemetryReporter = telemetryReporter;
-    private readonly ILogger _logger = loggerFactory.GetOrCreateLogger<RemoteServiceProvider>();
+    private readonly ILogger _logger = loggerFactory.GetOrCreateLogger<RemoteServiceInvoker>();
 
     private readonly object _gate = new();
     private ValueTask<bool>? _isInitializedTask;
@@ -49,7 +49,9 @@ internal sealed class RemoteServiceProvider(
         [CallerMemberName] string? callerMemberName = null)
         where TService : class
     {
-        var client = await TryGetClientAsync(cancellationToken).ConfigureAwait(false);
+        var client = typeof(IRemoteJsonService).IsAssignableFrom(typeof(TService))
+            ? await TryGetJsonClientAsync(cancellationToken).ConfigureAwait(false)
+            : await TryGetClientAsync(cancellationToken).ConfigureAwait(false);
         if (client is null)
         {
             _logger.LogError($"Couldn't get remote client for {typeof(TService).Name} service");
@@ -71,7 +73,7 @@ internal sealed class RemoteServiceProvider(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             var approximateCallingClassName = Path.GetFileNameWithoutExtension(callerFilePath);
-            _logger.LogError(ex, $"Error calling remote method for {typeof(TService).Name} service, invocation: ${approximateCallingClassName}.{callerMemberName}");
+            _logger.LogError(ex, $"Error calling remote method for {typeof(TService).Name} service, invocation: {approximateCallingClassName}.{callerMemberName}");
             _telemetryReporter.ReportFault(ex, "Exception calling remote method for {service}, invocation: {class}.{method}", typeof(TService).FullName, approximateCallingClassName, callerMemberName);
             return default;
         }
@@ -95,6 +97,24 @@ internal sealed class RemoteServiceProvider(
         await InitializeRemoteClientAsync(remoteClient, cancellationToken).ConfigureAwait(false);
 
         return remoteClient;
+    }
+
+    private async Task<RazorRemoteHostClient?> TryGetJsonClientAsync(CancellationToken cancellationToken)
+    {
+        // Even if we're getting a service that wants to use Json, we still have to initialize the OOP client
+        // so we get the regular (MessagePack) client too.
+        if (!_fullyInitialized)
+        {
+            _ = await TryGetClientAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        var workspace = _workspaceProvider.GetWorkspace();
+
+        return await RazorRemoteHostClient.TryGetClientAsync(
+            workspace.Services,
+            RazorServices.JsonDescriptors,
+            RazorRemoteServiceCallbackDispatcherRegistry.Empty,
+            cancellationToken).ConfigureAwait(false);
     }
 
     private async Task InitializeRemoteClientAsync(RazorRemoteHostClient remoteClient, CancellationToken cancellationToken)
