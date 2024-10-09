@@ -215,11 +215,13 @@ internal static partial class ConflictResolver
 
                 if (IsRenameValid(conflictResolution, renamedSymbolInNewSolution))
                 {
+                    var declarationDocument = await conflictResolution.CurrentSolution.GetRequiredDocumentAsync(_documentIdOfRenameSymbolDeclaration, includeSourceGenerated: true).ConfigureAwait(false);
+                    var semanticModel = await declarationDocument.GetRequiredSemanticModelAsync(_cancellationToken).ConfigureAwait(false);
                     await AddImplicitConflictsAsync(
                         renamedSymbolInNewSolution,
                         _renameLocationSet.Symbol,
                         _renameLocationSet.ImplicitLocations,
-                        await conflictResolution.CurrentSolution.GetRequiredDocument(_documentIdOfRenameSymbolDeclaration).GetRequiredSemanticModelAsync(_cancellationToken).ConfigureAwait(false),
+                        semanticModel,
                         _renameSymbolDeclarationLocation,
                         renamedSpansTracker.GetAdjustedPosition(_renameSymbolDeclarationLocation.SourceSpan.Start, _documentIdOfRenameSymbolDeclaration),
                         conflictResolution,
@@ -683,7 +685,7 @@ internal static partial class ConflictResolver
                     ? conflictResolution.GetAdjustedTokenStartingPosition(_renameSymbolDeclarationLocation.SourceSpan.Start, _documentIdOfRenameSymbolDeclaration)
                     : _renameSymbolDeclarationLocation.SourceSpan.Start;
 
-                var document = conflictResolution.CurrentSolution.GetRequiredDocument(_documentIdOfRenameSymbolDeclaration);
+                var document = await conflictResolution.CurrentSolution.GetRequiredDocumentAsync(_documentIdOfRenameSymbolDeclaration, includeSourceGenerated: true).ConfigureAwait(false);
                 var newSymbol = await SymbolFinder.FindSymbolAtPositionAsync(document, start, cancellationToken: _cancellationToken).ConfigureAwait(false);
                 return newSymbol;
             }
@@ -789,7 +791,7 @@ internal static partial class ConflictResolver
                 {
                     _cancellationToken.ThrowIfCancellationRequested();
 
-                    var document = originalSolution.GetRequiredDocument(documentId);
+                    var document = await originalSolution.GetRequiredDocumentAsync(documentId, includeSourceGenerated: true).ConfigureAwait(false);
                     var semanticModel = await document.GetRequiredSemanticModelAsync(_cancellationToken).ConfigureAwait(false);
                     var originalSyntaxRoot = await semanticModel.SyntaxTree.GetRootAsync(_cancellationToken).ConfigureAwait(false);
 

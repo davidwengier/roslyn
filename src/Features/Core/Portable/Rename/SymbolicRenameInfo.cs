@@ -110,14 +110,17 @@ internal sealed class SymbolicRenameInfo
         return replacementText;
     }
 
+    public static Task<SymbolicRenameInfo> GetRenameInfoAsync(Document document, int position, CancellationToken cancellationToken)
+        => GetRenameInfoAsync(document, position, allowRenameInGeneratedDocument: false, cancellationToken);
+
     public static async Task<SymbolicRenameInfo> GetRenameInfoAsync(
-        Document document, int position, CancellationToken cancellationToken)
+        Document document, int position, bool allowRenameInGeneratedDocument, CancellationToken cancellationToken)
     {
         var triggerToken = await GetTriggerTokenAsync(document, position, cancellationToken).ConfigureAwait(false);
         if (triggerToken == default)
             return new SymbolicRenameInfo(FeaturesResources.You_must_rename_an_identifier);
 
-        return await GetRenameInfoAsync(document, triggerToken, cancellationToken).ConfigureAwait(false);
+        return await GetRenameInfoAsync(document, triggerToken, allowRenameInGeneratedDocument, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<SyntaxToken> GetTriggerTokenAsync(Document document, int position, CancellationToken cancellationToken)
@@ -131,6 +134,7 @@ internal sealed class SymbolicRenameInfo
     private static async Task<SymbolicRenameInfo> GetRenameInfoAsync(
         Document document,
         SyntaxToken triggerToken,
+        bool allowRenameInGeneratedDocument,
         CancellationToken cancellationToken)
     {
         var syntaxFacts = document.GetRequiredLanguageService<ISyntaxFactsService>();
@@ -221,7 +225,7 @@ internal sealed class SymbolicRenameInfo
                 var solution = document.Project.Solution;
                 var sourceDocument = solution.GetRequiredDocument(location.SourceTree);
 
-                if (sourceDocument is SourceGeneratedDocument)
+                if (!allowRenameInGeneratedDocument && sourceDocument is SourceGeneratedDocument)
                 {
                     // The file is generated so doesn't count towards valid spans 
                     // we can edit.
