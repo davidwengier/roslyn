@@ -80,31 +80,4 @@ internal static class Completion
 
         return InlineCompletionsHandler.GetInlineCompletionItemsAsync(logger, document, position, options, xmlSnippetParser, cancellationToken);
     }
-
-    private sealed class EmptyLogger : ILspLogger
-    {
-        public void LogStartContext(string message, params object[] @params)
-        {
-        }
-
-        public void LogEndContext(string message, params object[] @params)
-        {
-        }
-
-        public void LogInformation(string message, params object[] @params)
-        {
-        }
-
-        public void LogWarning(string message, params object[] @params)
-        {
-        }
-
-        public void LogError(string message, params object[] @params)
-        {
-        }
-
-        public void LogException(Exception exception, string? message = null, params object[] @params)
-        {
-        }
-    }
 }
