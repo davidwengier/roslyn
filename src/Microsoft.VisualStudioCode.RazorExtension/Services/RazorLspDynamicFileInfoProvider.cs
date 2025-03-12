@@ -9,19 +9,8 @@ using Microsoft.CodeAnalysis.Razor.Workspaces;
 
 namespace Microsoft.VisualStudioCode.RazorExtension.Services;
 
-[Shared]
-[RazorExportLspServiceFactory(typeof(IRazorLspDynamicFileInfoProvider))]
-internal sealed class RazorLspDynamicFileInfoProviderFactory : AbstractRazorLspServiceFactory
-{
-    protected override IRazorLspService CreateService(IRazorLspServices lspServices)
-    {
-        return new RazorLspDynamicFileInfoProvider(
-            lspServices.GetRequiredService<IRazorClientLanguageServerManager>(),
-            lspServices.GetRequiredService<IWorkspaceProvider>());
-    }
-}
-
-internal sealed class RazorLspDynamicFileInfoProvider(IRazorClientLanguageServerManager clientLanguageServerManager, IWorkspaceProvider workspaceProvider) : IRazorLspDynamicFileInfoProvider, IRazorLspService
+[Export(typeof(IRazorLspDynamicFileInfoProvider)), Shared]
+internal sealed class RazorLspDynamicFileInfoProvider(IRazorClientLanguageServerManager clientLanguageServerManager, IWorkspaceProvider workspaceProvider) : IRazorLspDynamicFileInfoProvider
 {
     private const string ProvideRazorDynamicFileInfoMethodName = "razor/provideDynamicFileInfo";
 
