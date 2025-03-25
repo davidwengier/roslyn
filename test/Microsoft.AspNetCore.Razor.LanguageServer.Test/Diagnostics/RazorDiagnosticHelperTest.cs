@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.AspNetCore.Razor.LanguageServer.Diagnostics;
 
-public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : LanguageServerTestBase(testOutput)
+public class RazorDiagnosticHelperTest(ITestOutputHelper testOutput) : LanguageServerTestBase(testOutput)
 {
     [Fact]
     public void Convert_Converts()
@@ -23,7 +23,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var sourceText = SourceText.From(string.Empty);
 
         // Act
-        var diagnostic = RazorDiagnosticConverter.Convert(razorDiagnostic, sourceText, documentSnapshot: null);
+        var diagnostic = RazorDiagnosticHelper.ConvertToVSDiagnostic(razorDiagnostic, sourceText, documentSnapshot: null);
 
         // Assert
         Assert.Equal(razorDiagnostic.Id, diagnostic.Code);
@@ -39,7 +39,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedSeverity = DiagnosticSeverity.Error;
 
         // Act
-        var severity = RazorDiagnosticConverter.ConvertSeverity(RazorDiagnosticSeverity.Error);
+        var severity = RazorDiagnosticHelper.ConvertSeverity(RazorDiagnosticSeverity.Error);
 
         // Assert
         Assert.Equal(expectedSeverity, severity);
@@ -52,7 +52,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedSeverity = DiagnosticSeverity.Warning;
 
         // Act
-        var severity = RazorDiagnosticConverter.ConvertSeverity(RazorDiagnosticSeverity.Warning);
+        var severity = RazorDiagnosticHelper.ConvertSeverity(RazorDiagnosticSeverity.Warning);
 
         // Assert
         Assert.Equal(expectedSeverity, severity);
@@ -67,7 +67,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedRange = LspFactory.CreateSingleLineRange(line: 0, character: 3, length: 4);
 
         // Act
-        var range = RazorDiagnosticConverter.ConvertSpanToRange(sourceSpan, sourceText);
+        var range = RazorDiagnosticHelper.ConvertSpanToRange(sourceSpan, sourceText);
 
         // Assert
         Assert.Equal("lo W", sourceText.GetSubTextString(sourceText.GetTextSpan(range)));
@@ -83,7 +83,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedRange = LspFactory.DefaultRange;
 
         // Act
-        var range = RazorDiagnosticConverter.ConvertSpanToRange(sourceSpan, sourceText);
+        var range = RazorDiagnosticHelper.ConvertSpanToRange(sourceSpan, sourceText);
 
         // Assert
         Assert.Equal("", sourceText.GetSubTextString(sourceText.GetTextSpan(range)));
@@ -99,7 +99,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedRange = LspFactory.CreateZeroWidthRange(0, 11);
 
         // Act
-        var range = RazorDiagnosticConverter.ConvertSpanToRange(sourceSpan, sourceText);
+        var range = RazorDiagnosticHelper.ConvertSpanToRange(sourceSpan, sourceText);
 
         // Assert
         Assert.Equal("", sourceText.GetSubTextString(sourceText.GetTextSpan(range)));
@@ -115,7 +115,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var expectedRange = LspFactory.CreateSingleLineRange(line: 0, character: 6, length: 5);
 
         // Act
-        var range = RazorDiagnosticConverter.ConvertSpanToRange(sourceSpan, sourceText);
+        var range = RazorDiagnosticHelper.ConvertSpanToRange(sourceSpan, sourceText);
 
         // Assert
         Assert.Equal("World", sourceText.GetSubTextString(sourceText.GetTextSpan(range)));
@@ -130,7 +130,7 @@ public class RazorDiagnosticConverterTest(ITestOutputHelper testOutput) : Langua
         var sourceText = SourceText.From(string.Empty);
 
         // Act
-        var range = RazorDiagnosticConverter.ConvertSpanToRange(sourceSpan, sourceText);
+        var range = RazorDiagnosticHelper.ConvertSpanToRange(sourceSpan, sourceText);
 
         // Assert
         Assert.Null(range);

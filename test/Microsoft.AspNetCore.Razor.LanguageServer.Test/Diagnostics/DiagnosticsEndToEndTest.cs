@@ -9,15 +9,16 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.LanguageServer.EndpointContracts;
+using Microsoft.AspNetCore.Razor.LanguageServer.Hosting.Diagnostics;
 using Microsoft.CodeAnalysis.Razor.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.AspNetCore.Razor.LanguageServer.Diagnostics;
+namespace Microsoft.AspNetCore.Razor.LanguageServer.Test.Diagnostics;
 
-public class CSharpDiagnosticsEndToEndTest(ITestOutputHelper testOutput) : SingleServerDelegatingEndpointTestBase(testOutput)
+public sealed class DiagnosticsEndToEndTest(ITestOutputHelper testOutput) : SingleServerDelegatingEndpointTestBase(testOutput)
 {
     [Fact]
     public async Task Handle()
@@ -41,7 +42,7 @@ public class CSharpDiagnosticsEndToEndTest(ITestOutputHelper testOutput) : Singl
 
     [Fact]
     public async Task Handle_Razor()
-    {     
+    {
         var input = """
 
             {|RZ10012:<NonExistentComponent />|}
@@ -49,6 +50,26 @@ public class CSharpDiagnosticsEndToEndTest(ITestOutputHelper testOutput) : Singl
             """;
 
         await ValidateDiagnosticsAsync(input, "File.razor");
+    }
+
+    [Fact]
+    public async Task TODOComment()
+    {
+        var input = """
+
+            <div></div>
+
+            @functions
+            {
+                public void M()
+                {
+                    // {|TODO:|}TODO: This should be done
+                }
+            }
+
+            """;
+
+        await ValidateDiagnosticsAsync(input);
     }
 
     private async Task ValidateDiagnosticsAsync(string input, string? filePath = null)
@@ -64,15 +85,16 @@ public class CSharpDiagnosticsEndToEndTest(ITestOutputHelper testOutput) : Singl
         var requestContext = new RazorRequestContext(documentContext, null!, "lsp/method", uri: null);
 
         var translateDiagnosticsService = new RazorTranslateDiagnosticsService(DocumentMappingService, LoggerFactory);
-        var diagnosticsEndPoint = new DocumentPullDiagnosticsEndpoint(LanguageServerFeatureOptions, translateDiagnosticsService, languageServer, telemetryReporter: null);
+        var optionsMonitor = TestRazorLSPOptionsMonitor.Create();
+        var diagnosticsEndPoint = new DocumentDiagnosticsEndpoint(translateDiagnosticsService, languageServer, telemetryReporter: null);
 
-        var diagnosticsRequest = new VSInternalDocumentDiagnosticsParams
+        var diagnosticsRequest = new DocumentDiagnosticParams
         {
             TextDocument = new TextDocumentIdentifier { Uri = uri }
         };
-        var diagnostics = await diagnosticsEndPoint.HandleRequestAsync(diagnosticsRequest, requestContext, DisposalToken);
 
-        var actual = diagnostics!.SelectMany(d => d.Diagnostics!);
+        var report = await diagnosticsEndPoint.HandleRequestAsync(diagnosticsRequest, requestContext, DisposalToken);
+        var fullReport = Assert.IsType<FullDocumentDiagnosticReport>(report);
 
         // Because the test razor project isn't set up properly, we get some extra diagnostics that we don't care about
         // so lets just validate that we get the ones we expect. We're testing the communication and translation between
@@ -80,7 +102,7 @@ public class CSharpDiagnosticsEndToEndTest(ITestOutputHelper testOutput) : Singl
         foreach (var (code, span) in spans)
         {
             // If any future test requires multiple diagnostics of the same type, please change this code :)
-            var diagnostic = Assert.Single(actual, d => d.Code == code);
+            var diagnostic = Assert.Single(fullReport.Items, d => d.Code == code);
             Assert.Equal(span.First(), sourceText.GetTextSpan(diagnostic.Range));
         }
     }
