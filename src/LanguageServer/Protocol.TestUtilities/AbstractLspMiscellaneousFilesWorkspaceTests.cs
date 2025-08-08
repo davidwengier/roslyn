@@ -303,6 +303,51 @@ public abstract class AbstractLspMiscellaneousFilesWorkspaceTests : AbstractLang
     }
 
     [Theory, CombinatorialData]
+    public async Task TestLspTransfersFromMiscellaneousFilesToHostWorkspaceAsync_RazorFile(bool mutatingLspWorkspace, bool waitForWorkspace, bool fileBasedProgramContent)
+    {
+        // Create a server that includes the LSP misc files workspace so we can test transfers to and from it.
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
+
+        // Open an empty loose file and make a request to verify it gets added to the misc workspace.
+        using var tempRoot = new TempRoot();
+        var razorFilePath = Path.Combine(tempRoot.CreateDirectory().Path, "SomeFile.razor");
+        var razorFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(razorFilePath);
+        await testLspServer.OpenDocumentAsync(razorFileUri, "<div></div>").ConfigureAwait(false);
+
+        // Verify it is a miscellaneous document of some kind
+        await AssertFileInMiscWorkspaceAsync(testLspServer, razorFileUri).ConfigureAwait(false);
+        var miscDocument = await GetMiscellaneousAdditionalDocumentAsync(testLspServer).ConfigureAwait(false);
+        Assert.NotNull(miscDocument);
+        Assert.True(await testLspServer.GetManagerAccessor().IsMiscellaneousFilesDocumentAsync(miscDocument));
+        Assert.Equal("<div></div>", (await miscDocument.GetTextAsync(CancellationToken.None)).ToString());
+
+        // If this is file based, we're going to be inspecting the actual content on disk as a part of a dotnet run-api invocation
+        if (fileBasedProgramContent)
+            File.WriteAllText(razorFilePath, "<div></div>");
+
+        if (waitForWorkspace)
+        {
+            // Optionally wait for the workspace so we can test what happens if we're seeing if it's a file-based program; otherwise we can test what
+            // happens if that analysis is still happening while we're loading real solutions.
+            await testLspServer.TestWorkspace.GetService<AsynchronousOperationListenerProvider>().GetWaiter(FeatureAttribute.Workspace).ExpeditedWaitAsync();
+        }
+
+        // Update the registered workspace with the new document.
+        var newDocumentId = (await AddDocumentAsync(testLspServer, razorFilePath, "New Doc")).Id;
+
+        // Verify that the newly added document in the registered workspace is returned.
+        var (documentWorkspace, document) = await GetLspWorkspaceAndTextDocumentAsync(razorFileUri, testLspServer).ConfigureAwait(false);
+        AssertEx.NotNull(document);
+        Assert.Equal(TextDocumentKind.AdditionalDocument, document.Kind);
+        Assert.Equal(GetHostWorkspace(testLspServer), documentWorkspace);
+        Assert.False(await testLspServer.GetManagerAccessor().IsMiscellaneousFilesDocumentAsync(document));
+        Assert.Equal(newDocumentId, document.Id);
+        // Verify we still are using the tracked LSP text for the document.
+        var documentText = await document.GetTextAsync(CancellationToken.None);
+        Assert.Equal("<div></div>", documentText.ToString());
+    }
+
+    [Theory, CombinatorialData]
     public async Task TestLspTransfersFromMiscellaneousFilesToHostWorkspaceAsync(bool mutatingLspWorkspace, bool waitForWorkspace, bool fileBasedProgramContent)
     {
         var markup = fileBasedProgramContent ? "Console.WriteLine();" : "class C { }";
@@ -356,13 +401,19 @@ public abstract class AbstractLspMiscellaneousFilesWorkspaceTests : AbstractLang
         Assert.Equal("More LSP textLSP text", documentText.ToString());
     }
 
-    private protected abstract ValueTask<Document> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content);
+    private protected abstract ValueTask<TextDocument> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content);
     private protected abstract Workspace GetHostWorkspace(TestLspServer testLspServer);
 
     private static async Task<(Workspace? workspace, Document? document)> GetLspWorkspaceAndDocumentAsync(DocumentUri uri, TestLspServer testLspServer)
     {
-        var (workspace, _, document) = await testLspServer.GetManager().GetLspDocumentInfoAsync(CreateTextDocumentIdentifier(uri), CancellationToken.None).ConfigureAwait(false);
+        var (workspace, document) = await GetLspWorkspaceAndTextDocumentAsync(uri, testLspServer).ConfigureAwait(false);
         return (workspace, document as Document);
+    }
+
+    private static async Task<(Workspace? workspace, TextDocument? document)> GetLspWorkspaceAndTextDocumentAsync(DocumentUri uri, TestLspServer testLspServer)
+    {
+        var (workspace, _, document) = await testLspServer.GetManager().GetLspDocumentInfoAsync(CreateTextDocumentIdentifier(uri), CancellationToken.None).ConfigureAwait(false);
+        return (workspace, document);
     }
 
     private static async ValueTask<Document?> GetMiscellaneousDocumentAsync(TestLspServer testLspServer)

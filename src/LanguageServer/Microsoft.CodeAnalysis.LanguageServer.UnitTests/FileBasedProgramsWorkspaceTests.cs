@@ -50,7 +50,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         return exportProvider;
     }
 
-    private protected override async ValueTask<Document> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content)
+    private protected override async ValueTask<TextDocument> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content)
     {
         // For the file-based programs, we want to put them in the real workspace via the real host service
         var workspaceFactory = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<LanguageServerWorkspaceFactory>();
@@ -59,6 +59,13 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
             LanguageNames.CSharp,
             new ProjectSystemProjectCreationInfo { AssemblyName = Guid.NewGuid().ToString() },
             workspaceFactory.ProjectSystemHostInfo);
+
+        if (Path.GetExtension(filePath) == ".razor")
+        {
+            project.AddAdditionalFile(filePath);
+
+            return workspaceFactory.HostWorkspace.CurrentSolution.GetRequiredProject(project.Id).AdditionalDocuments.Single();
+        }
 
         project.AddSourceFile(filePath);
 

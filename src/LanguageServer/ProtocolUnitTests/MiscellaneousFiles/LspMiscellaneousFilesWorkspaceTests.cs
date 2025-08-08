@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.LanguageServer.UnitTests.Miscellaneous;
@@ -20,16 +21,24 @@ public sealed class LspMiscellaneousFilesWorkspaceTests : AbstractLspMiscellaneo
     {
     }
 
-    private protected override async ValueTask<Document> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content)
+    private protected override async ValueTask<TextDocument> AddDocumentAsync(TestLspServer testLspServer, string filePath, string content)
     {
         var projectId = testLspServer.TestWorkspace.CurrentSolution.ProjectIds.Single();
         var documentId = DocumentId.CreateNewId(projectId, filePath);
-        await testLspServer.TestWorkspace.AddDocumentAsync(
-            DocumentInfo.Create(
+        var documentInfo = DocumentInfo.Create(
                 documentId,
                 name: filePath,
                 filePath: filePath,
-                loader: new TestTextLoader(content)));
+                loader: new TestTextLoader(content));
+
+        if (Path.GetExtension(filePath) == ".razor")
+        {
+            await testLspServer.TestWorkspace.AddAdditionalDocumentAsync(documentInfo);
+
+            return testLspServer.TestWorkspace.CurrentSolution.GetRequiredAdditionalDocument(documentId);
+        }
+
+        await testLspServer.TestWorkspace.AddDocumentAsync(documentInfo);
 
         return testLspServer.TestWorkspace.CurrentSolution.GetRequiredDocument(documentId);
     }

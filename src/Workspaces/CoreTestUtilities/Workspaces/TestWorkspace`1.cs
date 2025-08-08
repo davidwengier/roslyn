@@ -541,6 +541,15 @@ public abstract partial class TestWorkspace<TDocument, TProject, TSolution> : Wo
         return this.RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind.DocumentAdded, oldSolution, newSolution, documentId: documentId);
     }
 
+    public Task AddAdditionalDocumentAsync(DocumentInfo documentInfo)
+    {
+        var documentId = documentInfo.Id;
+
+        var (oldSolution, newSolution) = this.SetCurrentSolutionEx(this.CurrentSolution.AddAdditionalDocument(documentInfo));
+
+        return this.RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind.AdditionalDocumentAdded, oldSolution, newSolution, documentId: documentId);
+    }
+
     public void ChangeAdditionalDocument(DocumentId documentId, SourceText text)
     {
         var (oldSolution, newSolution) = this.SetCurrentSolutionEx(this.CurrentSolution.WithAdditionalDocumentText(documentId, text));
