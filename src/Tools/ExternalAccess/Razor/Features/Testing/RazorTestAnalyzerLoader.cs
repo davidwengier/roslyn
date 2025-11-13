@@ -9,24 +9,10 @@ using Microsoft.CodeAnalysis.Host.Mef;
 namespace Microsoft.CodeAnalysis.ExternalAccess.Razor;
 
 [Export(typeof(RazorTestAnalyzerLoader)), Shared]
-internal class RazorTestAnalyzerLoader
+[method: ImportingConstructor]
+[method: Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
+internal class RazorTestAnalyzerLoader()
 {
-    [ImportingConstructor]
-    [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-    public RazorTestAnalyzerLoader()
-    {
-    }
-
-#pragma warning disable IDE0060 // Remove unused parameter
-#pragma warning disable CA1822 // Mark members as static
-    public void InitializeDiagnosticsServices(Workspace workspace)
-#pragma warning restore CA1822 // Mark members as static
-#pragma warning restore IDE0060 // Remove unused parameter
-    {
-    }
-
     public static IAnalyzerAssemblyLoader CreateAnalyzerAssemblyLoader()
-    {
-        return new AnalyzerAssemblyLoader();
-    }
+        => new AnalyzerAssemblyLoader();
 }
