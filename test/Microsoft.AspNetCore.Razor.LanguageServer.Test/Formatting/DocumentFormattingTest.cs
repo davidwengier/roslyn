@@ -19,6 +19,46 @@ namespace Microsoft.AspNetCore.Razor.LanguageServer.Formatting;
 public class DocumentFormattingTest(ITestOutputHelper testOutput) : DocumentFormattingTestBase(testOutput)
 {
     [Fact]
+    [WorkItem("https://github.com/dotnet/razor/issues/9658#issuecomment-3943605712")]
+    public async Task MultilineIfStatement()
+    {
+        await RunFormattingTestAsync(
+            input: """
+                <div>
+                    @if (true ||
+                        true ||
+                        true ||
+                        true)
+                        {
+                            // Hi
+                        }
+                    </div>
+                """,
+            htmlFormatted: """
+                <div>
+                    @if (true ||
+                    true ||
+                    true ||
+                    true)
+                    {
+                    // Hi
+                    }
+                </div>
+                """,
+            expected: """
+                <div>
+                    @if (true ||
+                        true ||
+                        true ||
+                        true)
+                    {
+                        // Hi
+                    }
+                </div>
+                """);
+    }
+
+    [Fact]
     [WorkItem("https://developercommunity.visualstudio.com/t/Format-Document-in-a-blazor-documents-ad/11046727")]
     public async Task MultilineRawStringLiteral()
     {
