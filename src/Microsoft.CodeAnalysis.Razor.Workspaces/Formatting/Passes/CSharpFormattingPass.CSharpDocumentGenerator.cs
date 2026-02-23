@@ -548,9 +548,9 @@ internal partial class CSharpFormattingPass
             {
                 var element = (MarkupElementSyntax)node.Parent;
 
-                if (ElementContentsShouldNotBeIndented(node))
+                if (ElementHasSignificantWhitespace(node))
                 {
-                    // The contents of textareas is significant, so we never want any formatting to happen in their contents
+                    // The contents of some html tags is significant, so we never want any formatting to happen in their contents
                     if (GetLineNumber(node) == GetLineNumber(node.CloseAngle))
                     {
                         _ignoreUntilLine = GetLineNumber(element.EndTag?.CloseAngle ?? element.StartTag.CloseAngle);
@@ -648,9 +648,10 @@ internal partial class CSharpFormattingPass
                 return true;
             }
 
-            private static bool ElementContentsShouldNotBeIndented(BaseMarkupStartTagSyntax node)
+            private static bool ElementHasSignificantWhitespace(BaseMarkupStartTagSyntax node)
             {
-                return node.Name.Content.Equals("textarea", StringComparison.OrdinalIgnoreCase);
+                return node.Name.Content.Equals("textarea", StringComparison.OrdinalIgnoreCase)
+                    || node.Name.Content.Equals("pre", StringComparison.OrdinalIgnoreCase);
             }
 
             public override LineInfo VisitRazorMetaCode(RazorMetaCodeSyntax node)
@@ -757,7 +758,7 @@ internal partial class CSharpFormattingPass
                         throw new InvalidOperationException($"Unknown attribute indentation style '{_attributeIndentStyle}'.");
                     }
 
-                    if (ElementContentsShouldNotBeIndented(startTag) &&
+                    if (ElementHasSignificantWhitespace(startTag) &&
                         GetLineNumber(node) == GetLineNumber(startTag.CloseAngle))
                     {
                         // If this is the last line of a tag that shouldn't be indented, honour that
