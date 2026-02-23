@@ -946,6 +946,10 @@ internal partial class CSharpFormattingPass
             public override LineInfo VisitCSharpCodeBlock(CSharpCodeBlockSyntax node)
             {
                 // Matches things like @if, so skip the first character, but output as C# otherwise
+                // Make sure to output leading whitespace, if any, as Roslyn can move multi-line constructs relative to the first
+                // line, and if we don't maintain input whitespace, we're effectively de-denting, which means when it re-indents,
+                // Roslyn will indent other lines, causing them to migrate right over time.
+                _builder.Append(_sourceText.ToString(TextSpan.FromBounds(_currentLine.Start, _currentFirstNonWhitespacePosition)));
                 _builder.AppendLine(_sourceText.ToString(TextSpan.FromBounds(_currentToken.Position + 1, _currentLine.End)));
 
                 return CreateLineInfo(
