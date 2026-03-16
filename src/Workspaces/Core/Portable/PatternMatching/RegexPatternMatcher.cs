@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -37,8 +37,12 @@ internal abstract partial class PatternMatcher
                 // Both regexes are compiled to native code on first use, amortizing the compilation
                 // cost across the many candidate strings checked during a single NavigateTo search.
                 const RegexOptions commonOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace;
-                var caseInsensitive = new Regex(pattern, commonOptions | RegexOptions.IgnoreCase);
-                var caseSensitive = new Regex(pattern, commonOptions);
+
+                // Ensure that regexes that run too long (e.g. due to catastrophic backtracking) always terminate.
+                var timeout = TimeSpan.FromSeconds(1);
+
+                var caseInsensitive = new Regex(pattern, commonOptions | RegexOptions.IgnoreCase, timeout);
+                var caseSensitive = new Regex(pattern, commonOptions, timeout);
                 return new RegexPatternMatcher(caseInsensitive, caseSensitive, includeMatchedSpans, culture);
             }
             catch (ArgumentException)
