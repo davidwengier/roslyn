@@ -28,7 +28,7 @@ With the plugin active, the agent gains LSP-powered capabilities for C# code:
 
 ## Prerequisites
 
-- **.NET SDK** must be installed and available on `PATH`. The language server requires a .NET 10 or higher SDK.
+- **.NET 10 SDK** must be installed and available on `PATH`.  Your project can still use an older, supported SDK.
 
 ## Automatic Project Loading
 
@@ -95,28 +95,6 @@ Look for log files related to `csharp` or `roslyn-language-server`. These contai
 ## How It Works
 
 The plugin is configured in the [dotnet/skills](https://github.com/dotnet/skills) repository via [`plugins/dotnet/lsp.json`](https://github.com/dotnet/skills/blob/main/plugins/dotnet/lsp.json):
-
-```json
-{
-  "lspServers": {
-    "csharp": {
-      "command": "dotnet",
-      "args": [
-        "dnx",
-        "roslyn-language-server",
-        "--yes",
-        "--prerelease",
-        "--",
-        "--stdio",
-        "--autoLoadProjects"
-      ],
-      "fileExtensions": {
-        ".cs": "csharp"
-      }
-    }
-  }
-}
-```
 
 When the agent opens a workspace containing `.cs` files, it will:
 
