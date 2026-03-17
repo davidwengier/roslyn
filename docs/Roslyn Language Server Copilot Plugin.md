@@ -63,16 +63,13 @@ As a fallback, the server recursively discovers all `.csproj` files within the w
 
 ## Troubleshooting
 
-### Projects aren't loading
+### Verify LSP configuration is found
 
-- Verify that a compatible .NET SDK is installed by running `dotnet --version`.
-- Check that your project builds successfully with `dotnet build` before using the language server.
-- For large repositories with multiple solutions, configure `dotnet.defaultSolution` in `.vscode/settings.json` to specify which solution to load.
-
-### The tool isn't being found
-
-- Ensure `dotnet` is on your `PATH`.
-- Try installing the tool manually: `dotnet tool install -g roslyn-language-server --prerelease`.
+- In Copilot CLI, running the `/lsp show` should show the server configured for C#:
+```
+  Plugin-configured servers:
+    • csharp: (.cs) [from dotnet]
+```
 
 ### Viewing LSP Logs
 
@@ -82,6 +79,21 @@ Copilot CLI writes LSP server logs to the `.copilot/logs/` directory in your hom
 - **Windows:** `%USERPROFILE%\.copilot\logs\`
 
 Look for log files related to `csharp` or `roslyn-language-server`. These contain the server's startup output, project loading progress, and any errors encountered. This is the first place to check when the language server isn't behaving as expected.
+
+### The tool isn't being found
+
+- Ensure `dotnet` is on your `PATH`.
+- Check for a `nuget.config` (repo, user, or machine-level) that restricts package sources; `dnx` uses NuGet sources to resolve tools.
+- Verify `nuget.org` (or an other feed that mirrors `roslyn-language-server`) is enabled, for example with `dotnet nuget list source`.
+- Try installing the tool manually: `dotnet tool install -g roslyn-language-server --prerelease`.
+
+### Project load issues
+
+If the LSP logs show failures loading projects
+
+- Verify that a compatible .NET SDK is installed by running `dotnet --version`.
+- Check that your project builds successfully with `dotnet build` before using the language server.
+- For large repositories with multiple solutions, configure `dotnet.defaultSolution` in `.vscode/settings.json` to specify which solution to load.
 
 ### Performance
 
