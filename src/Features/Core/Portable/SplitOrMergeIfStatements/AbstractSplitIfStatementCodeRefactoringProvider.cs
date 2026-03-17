@@ -65,7 +65,7 @@ internal abstract class AbstractSplitIfStatementCodeRefactoringProvider : CodeRe
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
         var token = root.FindToken(tokenSpan.Start);
-        var ifOrElseIf = root.FindNode(ifOrElseIfSpan);
+        var ifOrElseIf = FindIfOrElseIf(ifOrElseIfSpan, ifGenerator, root);
 
         Debug.Assert(ifGenerator.IsIfOrElseIf(ifOrElseIf));
 
@@ -107,5 +107,12 @@ internal abstract class AbstractSplitIfStatementCodeRefactoringProvider : CodeRe
         var right = rootExpression.ReplaceNode(token.Parent, parentRight);
 
         return (left, right);
+    }
+
+    private static SyntaxNode FindIfOrElseIf(TextSpan span, IIfLikeStatementGenerator ifGenerator, SyntaxNode root)
+    {
+        var innerMatch = root.FindNode(span, getInnermostNodeForTie: true);
+        return innerMatch?.FirstAncestorOrSelf<SyntaxNode>(
+            node => ifGenerator.IsIfOrElseIf(node) && node.Span == span);
     }
 }
