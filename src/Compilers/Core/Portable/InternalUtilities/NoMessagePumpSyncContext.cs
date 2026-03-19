@@ -55,11 +55,7 @@ internal sealed class NoMessagePumpSyncContext : SynchronizationContext
         // Off Windows, we can't p/invoke to kernel32, but it appears that .NET Core never calls CoWait, so we can rely on default behavior.
         // We're just going to use the OS as the switch instead of the framework so that (one day) if we drop our .NET Framework specific target,
         // and if .NET Core ever adds CoWait support on Windows, we'll still behave properly.
-#if NET5_0_OR_GREATER
-        if (OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
-#else
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-#endif
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
             return (int)WaitForMultipleObjects((uint)waitHandles.Length, waitHandles, waitAll, (uint)millisecondsTimeout);
         }
