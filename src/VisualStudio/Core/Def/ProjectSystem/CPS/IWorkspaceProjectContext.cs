@@ -15,9 +15,9 @@ namespace Microsoft.VisualStudio.LanguageServices.ProjectSystem;
 /// Project context to initialize properties and items of a Workspace project created by <see cref="IWorkspaceProjectContextFactory"/>. 
 /// </summary>
 /// <remarks>
-/// <see cref="IDisposable.Dispose"/> is safe to call on instances of this type on any thread.
+/// All methods are safe to call from any thread.
 /// </remarks>
-internal interface IWorkspaceProjectContext : IDisposable
+internal interface IWorkspaceProjectContext : IDisposable, IAsyncDisposable
 {
     // Project properties.
     string DisplayName { get; set; }
