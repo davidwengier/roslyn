@@ -242,6 +242,7 @@ internal sealed partial class CPSProject : IWorkspaceProjectContext
     public void AddAdditionalFile(string filePath, IEnumerable<string> folderNames, bool isInCurrentContext = true)
         => _projectSystemProject.AddAdditionalFile(filePath, folders: [.. folderNames]);
 
+    [Obsolete("Switch to using the DisposeAsync version of this API instead.")]
     public void Dispose()
     {
         if (Interlocked.CompareExchange(ref _disposed, value: 1, comparand: 0) != 0)

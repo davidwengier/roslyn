@@ -19,6 +19,10 @@ namespace Microsoft.VisualStudio.LanguageServices.ProjectSystem;
 /// </remarks>
 internal interface IWorkspaceProjectContext : IDisposable, IAsyncDisposable
 {
+    /// <inheritdoc cref="IDisposable.Dispose"/>
+    [Obsolete("Use DisposeAsync instead.")]
+    new void Dispose();
+
     // Project properties.
     string DisplayName { get; set; }
     string? ProjectFilePath { get; set; }
