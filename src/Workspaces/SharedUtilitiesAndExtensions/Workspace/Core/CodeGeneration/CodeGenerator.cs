@@ -89,6 +89,10 @@ internal static class CodeGenerator
     /// <summary>
     /// Returns <c>true</c> if additional declarations can be added to the destination symbol's declaration.
     /// </summary>
-    public static bool CanAdd(Solution solution, ISymbol destination, CancellationToken cancellationToken)
-        => GetCodeGenerationService(solution, destination.Language).CanAddTo(destination, solution, cancellationToken);
+    public static bool CanAdd(
+        Solution solution,
+        ISymbol destination,
+        CancellationToken cancellationToken,
+        CodeGenerationKind generationKind = CodeGenerationKind.Default)
+        => GetCodeGenerationService(solution, destination.Language).CanAddTo(destination, solution, cancellationToken, generationKind);
 }

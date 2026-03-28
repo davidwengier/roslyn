@@ -41,6 +41,7 @@ internal abstract partial class AbstractGenerateParameterizedMemberService<TServ
         public SignatureInfo SignatureInfo { get; protected set; }
         public MethodKind MethodKind { get; internal set; }
         public MethodGenerationKind MethodGenerationKind { get; protected set; }
+        public CodeGenerationKind RequestedGenerationKind { get; protected set; }
         protected Location location = null;
         public Location Location
         {
@@ -55,7 +56,11 @@ internal abstract partial class AbstractGenerateParameterizedMemberService<TServ
             }
         }
 
-        protected async Task<bool> TryFinishInitializingStateAsync(TService service, SemanticDocument document, CancellationToken cancellationToken)
+        protected async Task<bool> TryFinishInitializingStateAsync(
+            TService service,
+            SemanticDocument document,
+            CancellationToken cancellationToken,
+            CodeGenerationKind generationKind = CodeGenerationKind.Default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             TypeToGenerateIn = await SymbolFinderInternal.FindSourceDefinitionAsync(TypeToGenerateIn, document.Project.Solution, cancellationToken).ConfigureAwait(false) as INamedTypeSymbol;
@@ -69,7 +74,8 @@ internal abstract partial class AbstractGenerateParameterizedMemberService<TServ
                 return false;
             }
 
-            if (!CodeGenerator.CanAdd(document.Project.Solution, TypeToGenerateIn, cancellationToken))
+            RequestedGenerationKind = generationKind;
+            if (!CodeGenerator.CanAdd(document.Project.Solution, TypeToGenerateIn, cancellationToken, generationKind))
             {
                 return false;
             }

@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeGeneration;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.CodeAnalysis.PooledObjects;
@@ -54,10 +55,15 @@ internal abstract partial class AbstractGenerateParameterizedMemberService<TServ
         if (semanticFacts.SupportsParameterizedProperties &&
             state.InvocationExpressionOpt != null)
         {
+            // The shared state-level CanAdd check above uses the method-specific generation kind.
+            // Re-check with the default kind here so we only offer the property action when the
+            // destination can accept property generation as well.
+            // This can be removed when Razor supports generating properties.
+            var canGenerateProperty = CodeGenerator.CanAdd(document.Project.Solution, state.TypeToGenerateIn, cancellationToken);
             var typeParameters = state.SignatureInfo.DetermineTypeParameters(cancellationToken);
             var returnType = await state.SignatureInfo.DetermineReturnTypeAsync(cancellationToken).ConfigureAwait(false);
 
-            if (typeParameters.Length == 0 && returnType.SpecialType != SpecialType.System_Void)
+            if (canGenerateProperty && typeParameters.Length == 0 && returnType.SpecialType != SpecialType.System_Void)
             {
                 result.Add(new GenerateParameterizedMemberCodeAction((TService)this, document, state, isAbstract: false, generateProperty: true));
 

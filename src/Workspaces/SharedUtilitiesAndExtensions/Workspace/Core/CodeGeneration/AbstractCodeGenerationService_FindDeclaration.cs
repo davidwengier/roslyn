@@ -22,10 +22,16 @@ internal abstract partial class AbstractCodeGenerationService<TCodeGenerationCon
     private IList<bool>? GetAvailableInsertionIndices<TDeclarationNode>(TDeclarationNode destination, CancellationToken cancellationToken) where TDeclarationNode : SyntaxNode
         => GetAvailableInsertionIndices((SyntaxNode)destination, cancellationToken);
 
-    public bool CanAddTo(ISymbol destination, Solution solution, CancellationToken cancellationToken)
+    public bool CanAddTo(
+        ISymbol destination,
+        Solution solution,
+        CancellationToken cancellationToken,
+        CodeGenerationKind generationKind = CodeGenerationKind.Default)
     {
         var declarations = _symbolDeclarationService.GetDeclarations(destination);
-        return declarations.Any(static (r, arg) => arg.self.CanAddTo(r.GetSyntax(arg.cancellationToken), arg.solution, arg.cancellationToken), (self: this, solution, cancellationToken));
+        return declarations.Any(
+            static (r, arg) => arg.self.CanAddTo(r.GetSyntax(arg.cancellationToken), arg.solution, arg.cancellationToken, arg.generationKind),
+            (self: this, solution, cancellationToken, generationKind));
     }
 
     protected static SyntaxToken GetEndToken(SyntaxNode node)
@@ -52,15 +58,20 @@ internal abstract partial class AbstractCodeGenerationService<TCodeGenerationCon
         return TextSpan.FromBounds(start.SpanStart, end.Span.End);
     }
 
-    public bool CanAddTo(SyntaxNode destination, Solution solution, CancellationToken cancellationToken)
-        => CanAddTo(destination, solution, cancellationToken, out _);
+    public bool CanAddTo(
+        SyntaxNode destination,
+        Solution solution,
+        CancellationToken cancellationToken,
+        CodeGenerationKind generationKind = CodeGenerationKind.Default)
+        => CanAddTo(destination, solution, cancellationToken, out _, generationKind: generationKind);
 
     private bool CanAddTo(
         SyntaxNode? destination,
         Solution solution,
         CancellationToken cancellationToken,
         out IList<bool>? availableIndices,
-        bool checkGeneratedCode = false)
+        bool checkGeneratedCode = false,
+        CodeGenerationKind generationKind = CodeGenerationKind.Default)
     {
         availableIndices = null;
         if (destination == null)
@@ -142,7 +153,8 @@ internal abstract partial class AbstractCodeGenerationService<TCodeGenerationCon
         Solution solution,
         INamespaceOrTypeSymbol namespaceOrType,
         Location? location,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        CodeGenerationKind generationKind = CodeGenerationKind.Default)
     {
         var symbol = namespaceOrType;
 
@@ -225,7 +237,7 @@ internal abstract partial class AbstractCodeGenerationService<TCodeGenerationCon
                 if (predicate(decl))
                 {
                     fallbackDeclaration ??= decl;
-                    if (CanAddTo(decl, solution, cancellationToken, out availableIndices, checkGeneratedCode))
+                    if (CanAddTo(decl, solution, cancellationToken, out availableIndices, checkGeneratedCode, generationKind))
                     {
                         declaration = decl;
                         return true;

@@ -16,6 +16,10 @@ namespace Microsoft.CodeAnalysis.CodeGeneration;
 
 internal static class CodeGenerationHelpers
 {
+    public static bool IsRazorSourceGeneratedDocument(Document document)
+        => document.FilePath is string filePath &&
+           filePath.IndexOf("Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", StringComparison.Ordinal) >= 0;
+
     public static SyntaxNode? GenerateThrowStatement(
         SyntaxGenerator factory,
         SemanticDocument document,

@@ -84,11 +84,12 @@ internal abstract partial class AbstractGenerateParameterizedMemberService<TServ
                 var method = await _state.SignatureInfo.GenerateMethodAsync(syntaxFactory, _isAbstract, cancellationToken).ConfigureAwait(false);
 
                 var result = await CodeGenerator.AddMethodDeclarationAsync(
-                   new CodeGenerationSolutionContext(
-                       _document.Project.Solution,
-                       new CodeGenerationContext(
-                           afterThisLocation: _state.Location,
-                           generateMethodBodies: _state.TypeToGenerateIn.TypeKind != TypeKind.Interface)),
+                    new CodeGenerationSolutionContext(
+                        _document.Project.Solution,
+                        new CodeGenerationContext(
+                            afterThisLocation: _state.Location,
+                            generateMethodBodies: _state.TypeToGenerateIn.TypeKind != TypeKind.Interface,
+                            generationKind: _state.RequestedGenerationKind)),
                     _state.TypeToGenerateIn,
                     method,
                     cancellationToken).ConfigureAwait(false);

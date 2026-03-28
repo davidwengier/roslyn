@@ -73,7 +73,11 @@ internal abstract partial class AbstractGenerateMethodService<TService, TSimpleN
                 }
             }
 
-            return await TryFinishInitializingStateAsync(service, document, cancellationToken).ConfigureAwait(false);
+            return await TryFinishInitializingStateAsync(
+                service,
+                document,
+                cancellationToken,
+                generationKind: CodeGenerationKind.GenerateMethod).ConfigureAwait(false);
         }
 
         private bool TryInitializeExplicitInterface(
