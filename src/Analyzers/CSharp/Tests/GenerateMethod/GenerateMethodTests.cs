@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Diagnostics.GenerateMethod;
 
 [Trait(Traits.Feature, Traits.Features.CodeActionsGenerateMethod)]
-public sealed class GenerateMethodTests(ITestOutputHelper logger) : AbstractCSharpDiagnosticProviderBasedUserDiagnosticTest_NoEditor(logger)
+public sealed partial class GenerateMethodTests(ITestOutputHelper logger) : AbstractCSharpDiagnosticProviderBasedUserDiagnosticTest_NoEditor(logger)
 {
     internal override (DiagnosticAnalyzer?, CodeFixProvider) CreateDiagnosticProviderAndFixer(Workspace workspace)
         => (null, new GenerateMethodCodeFixProvider());
@@ -9501,7 +9501,7 @@ public sealed class GenerateMethodTests(ITestOutputHelper logger) : AbstractCSha
             }
                                     </DocumentFromSourceGenerator>
                                 </Project>
-                            </Workspace>
+                             </Workspace>
             """);
 
     [Fact]
