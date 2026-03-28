@@ -87,10 +87,13 @@ internal abstract partial class AbstractCodeGenerationService<TCodeGenerationCon
             return false;
         }
 
-        // We can never generate into a document from a source generator, because those are immutable
         if (document is SourceGeneratedDocument)
         {
-            return false;
+            // We only support Razor source generated documents, as Razor has the code that can map the edits
+            // from generated code back to Razor code for that feature. They also don't care about hidden code, so it's
+            // fine to skip the rest of this method when that case applies.
+            return generationKind == CodeGenerationKind.GenerateMethod &&
+                CodeGenerationHelpers.IsRazorSourceGeneratedDocument(document);
         }
 
 #if WORKSPACE
