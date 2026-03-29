@@ -167,7 +167,7 @@ internal sealed class NewLineUserSettingFormattingRule : BaseFormattingRule
         // * { - in the member declaration context
         // In top-level code, everything is a GlobalStatementSyntax which inherits from MemberDeclarationSyntax,
         // but we don't want to format a plain open brace as though it's from a member declaration.
-        if (currentToken.IsKind(SyntaxKind.OpenBraceToken) && 
+        if (currentToken.IsKind(SyntaxKind.OpenBraceToken) &&
             currentTokenParentParent is MemberDeclarationSyntax and not GlobalStatementSyntax)
         {
             var option = currentTokenParentParent is BasePropertyDeclarationSyntax
@@ -371,7 +371,7 @@ internal sealed class NewLineUserSettingFormattingRule : BaseFormattingRule
         // * { - in the member declaration context
         // In top-level code, everything is a GlobalStatementSyntax which inherits from MemberDeclarationSyntax,
         // but we don't want to format a plain open brace as though it's from a member declaration.
-        if (currentToken.IsKind(SyntaxKind.OpenBraceToken) && 
+        if (currentToken.IsKind(SyntaxKind.OpenBraceToken) &&
             currentTokenParentParent is MemberDeclarationSyntax and not GlobalStatementSyntax)
         {
             var option = currentTokenParentParent is BasePropertyDeclarationSyntax
