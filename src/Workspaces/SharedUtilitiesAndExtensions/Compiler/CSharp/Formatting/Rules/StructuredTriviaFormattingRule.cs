@@ -25,6 +25,16 @@ internal sealed class StructuredTriviaFormattingRule : BaseFormattingRule
     {
         if (previousToken.Parent is StructuredTriviaSyntax || currentToken.Parent is StructuredTriviaSyntax)
         {
+            // File-based app directives use IgnoredDirectiveTriviaSyntax, but their '#:' prefix and
+            // directive text are syntax-significant and must not be split by normal punctuation spacing.
+            if (previousToken.Parent is IgnoredDirectiveTriviaSyntax ignoredDirective &&
+                currentToken.Parent == previousToken.Parent &&
+                ((previousToken == ignoredDirective.HashToken && currentToken == ignoredDirective.ColonToken) ||
+                 (previousToken == ignoredDirective.ColonToken && currentToken == ignoredDirective.Content)))
+            {
+                return CreateAdjustSpacesOperation(space: 0, option: AdjustSpacesOption.ForceSpacesIfOnSingleLine);
+            }
+
             // this doesn't take care of all cases where tokens belong to structured trivia. this is only for cases we care
             if (previousToken.Kind() == SyntaxKind.HashToken && SyntaxFacts.IsPreprocessorKeyword(currentToken.Kind()))
             {
