@@ -25,12 +25,11 @@ internal sealed class StructuredTriviaFormattingRule : BaseFormattingRule
     {
         if (previousToken.Parent is StructuredTriviaSyntax || currentToken.Parent is StructuredTriviaSyntax)
         {
-            // File-based app directives use IgnoredDirectiveTriviaSyntax, but their '#:' prefix and
-            // directive text are syntax-significant and must not be split by normal punctuation spacing.
-            if (previousToken.Parent is IgnoredDirectiveTriviaSyntax ignoredDirective &&
-                currentToken.Parent == previousToken.Parent &&
-                ((previousToken == ignoredDirective.HashToken && currentToken == ignoredDirective.ColonToken) ||
-                 (previousToken == ignoredDirective.ColonToken && currentToken == ignoredDirective.Content)))
+            // File-based app directives use a '#:' prefix inside structured trivia, and the directive
+            // text is syntax-significant and must not be split by normal punctuation spacing.
+            if (currentToken.Parent == previousToken.Parent &&
+                ((previousToken.Kind() == SyntaxKind.HashToken && currentToken.Kind() == SyntaxKind.ColonToken) ||
+                 (previousToken.Kind() == SyntaxKind.ColonToken && currentToken.Kind() == SyntaxKind.StringLiteralToken)))
             {
                 return CreateAdjustSpacesOperation(space: 0, option: AdjustSpacesOption.ForceSpacesIfOnSingleLine);
             }
