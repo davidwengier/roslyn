@@ -293,4 +293,22 @@ partial class Methods
     /// </summary>
     /// <remarks>Since LSP 3.18</remarks>
     public static readonly LspRequest<TextDocumentContentParams, TextDocumentContentResult> WorkspaceTextDocumentContent = new(WorkspaceTextDocumentContentName);
+
+    /// <summary>
+    /// Method name for 'workspace/textDocumentContent/refresh'.
+    /// <para>
+    /// The server sends this request to the client to ask for the content of a virtual text document to be refreshed.
+    /// </para>
+    /// <para>
+    /// See the <see href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.18/specification/#workspace_textDocumentContent">Language Server Protocol specification</see> for additional information.
+    /// </para>
+    /// </summary>
+    /// <remarks>Since LSP 3.18</remarks>
+    public const string WorkspaceTextDocumentContentRefreshName = "workspace/textDocumentContent/refresh";
+
+    /// <summary>
+    /// Strongly typed message object for 'workspace/textDocumentContent/refresh'.
+    /// </summary>
+    /// <remarks>Since LSP 3.18</remarks>
+    public static readonly LspRequest<TextDocumentContentRefreshParams, object?> WorkspaceTextDocumentContentRefresh = new(WorkspaceTextDocumentContentRefreshName);
 }

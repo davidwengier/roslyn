@@ -14,7 +14,9 @@ using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.LanguageServer.Handler;
 using Microsoft.CodeAnalysis.LanguageServer.Handler.Completion;
 using Microsoft.CodeAnalysis.LanguageServer.Handler.SemanticTokens;
+using Microsoft.CodeAnalysis.LanguageServer.Handler.TextDocumentContent;
 using Microsoft.CodeAnalysis.SignatureHelp;
+using Microsoft.CommonLanguageServerProtocol.Framework;
 using Roslyn.LanguageServer.Protocol;
 
 namespace Microsoft.CodeAnalysis.LanguageServer;
@@ -42,7 +44,7 @@ internal sealed class DefaultCapabilitiesProvider : ICapabilitiesProvider
         _renameListeners = renameListeners;
     }
 
-    public ServerCapabilities GetCapabilities(ClientCapabilities clientCapabilities)
+    public ServerCapabilities GetCapabilities(ClientCapabilities clientCapabilities, ILspServices lspServices)
     {
         var supportsVsExtensions = clientCapabilities.HasVisualStudioLspCapability();
         var capabilities = supportsVsExtensions ? GetVSServerCapabilities() : new VSInternalServerCapabilities();
@@ -144,6 +146,7 @@ internal sealed class DefaultCapabilitiesProvider : ICapabilitiesProvider
             };
         }
 
+        WorkspaceFileOperationsServerCapabilities? fileOperations = null;
         if (clientCapabilities.Workspace?.FileOperations?.WillRename ?? false)
         {
             // Register for file rename notifications based on the registered rename listeners.
@@ -158,17 +161,38 @@ internal sealed class DefaultCapabilitiesProvider : ICapabilitiesProvider
 
             if (filters.Count > 0)
             {
-                capabilities.Workspace = new WorkspaceServerCapabilities
+                fileOperations = new WorkspaceFileOperationsServerCapabilities()
                 {
-                    FileOperations = new WorkspaceFileOperationsServerCapabilities()
+                    WillRename = new FileOperationRegistrationOptions()
                     {
-                        WillRename = new FileOperationRegistrationOptions()
-                        {
-                            Filters = filters.ToArray()
-                        }
+                        Filters = filters.ToArray()
                     }
                 };
             }
+        }
+
+        TextDocumentContentOptions? textDocumentContent = null;
+        if (clientCapabilities.Workspace?.TextDocumentContent is not null)
+        {
+            // Client supports textDocumentContent - register the schemes from all providers so the client
+            // can use workspace/textDocumentContent to retrieve virtual document contents.
+            var schemes = lspServices.GetRequiredServices<ITextDocumentContentProvider>().Select(p => p.Scheme).ToArray();
+            if (schemes.Length > 0)
+            {
+                textDocumentContent = new TextDocumentContentOptions
+                {
+                    Schemes = schemes
+                };
+            }
+        }
+
+        if (fileOperations is not null || textDocumentContent is not null)
+        {
+            capabilities.Workspace = new WorkspaceServerCapabilities
+            {
+                FileOperations = fileOperations,
+                TextDocumentContent = textDocumentContent,
+            };
         }
 
         return capabilities;

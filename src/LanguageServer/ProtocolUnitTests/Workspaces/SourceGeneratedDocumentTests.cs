@@ -7,11 +7,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Host;
-using Microsoft.CodeAnalysis.LanguageServer.Handler;
-using Microsoft.CodeAnalysis.LanguageServer.Handler.SourceGenerators;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Test.Utilities;
 using Roslyn.Test.Utilities.TestGenerators;
+using StreamJsonRpc;
 using Xunit;
 using Xunit.Abstractions;
 using LSP = Roslyn.LanguageServer.Protocol;
@@ -29,11 +28,10 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// Hello, World", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Hello, World", result.Text);
     }
 
     [Theory, CombinatorialData]
@@ -45,14 +43,13 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// Hello, World", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Hello, World", result.Text);
 
         // Verifying opening and closing the document doesn't cause any issues.
-        await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, text.Text);
+        await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, result.Text);
         await testLspServer.CloseDocumentAsync(sourceGeneratorDocumentUri);
     }
 
@@ -70,10 +67,9 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
 
         foreach (var sourceGeneratorDocumentUri in sourceGeneratorDocumentUris)
         {
-            var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-                new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
-            AssertEx.NotNull(text?.Text);
-            await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, text.Text);
+            var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+            AssertEx.NotNull(result?.Text);
+            await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, result.Text);
         }
 
         foreach (var sourceGeneratorDocumentUri in sourceGeneratorDocumentUris)
@@ -114,11 +110,10 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         // However the get text handler should return the real source generator source.
         await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, "LSP Open Document Text");
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal(sourceGeneratorSource, text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal(sourceGeneratorSource, result.Text);
     }
 
     [Theory, CombinatorialData]
@@ -130,18 +125,15 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// Hello, World", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Hello, World", result.Text);
 
-        // Make a second request - since nothing has changed we should get back the same resultId.
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-        AssertEx.NotNull(secondRequest);
-        Assert.Null(secondRequest.Text);
-        Assert.Equal(text.ResultId, secondRequest.ResultId);
+        // Make a second request - since nothing has changed we should get back the same text.
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(secondResult);
+        Assert.Equal("// Hello, World", secondResult.Text);
     }
 
     [Theory, CombinatorialData]
@@ -159,11 +151,10 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// callCount: 0", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// callCount: 0", result.Text);
 
         // Modify a normal document in the workspace.
         // In automatic mode this should trigger generators to re-run.
@@ -172,22 +163,19 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await testLspServer.WaitForSourceGeneratorsAsync();
 
         // Ask for the source generated text again.
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
         if (sourceGeneratorExecution == SourceGeneratorExecutionPreference.Automatic)
         {
             // We should get newly generated text
-            AssertEx.NotNull(secondRequest);
-            Assert.NotEqual(text.ResultId, secondRequest.ResultId);
-            Assert.Equal("// callCount: 1", secondRequest.Text);
+            AssertEx.NotNull(secondResult);
+            Assert.Equal("// callCount: 1", secondResult.Text);
         }
         else
         {
-            // We should get an unchanged result
-            AssertEx.NotNull(secondRequest);
-            Assert.Equal(text.ResultId, secondRequest.ResultId);
-            Assert.Null(secondRequest.Text);
+            // We should get the same text as before
+            AssertEx.NotNull(secondResult);
+            Assert.Equal("// callCount: 0", secondResult.Text);
         }
     }
 
@@ -206,20 +194,17 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// callCount: 0", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// callCount: 0", result.Text);
 
         // Updating the execution version should trigger source generators to run in both automatic and balanced mode.
         await testLspServer.RefreshSourceGeneratorsAsync(forceRegeneration: true);
 
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-        AssertEx.NotNull(secondRequest);
-        Assert.NotEqual(text.ResultId, secondRequest.ResultId);
-        Assert.Equal("// callCount: 1", secondRequest.Text);
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(secondResult);
+        Assert.Equal("// callCount: 1", secondResult.Text);
     }
 
     [Theory, CombinatorialData]
@@ -244,11 +229,10 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// callCount: 0", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// callCount: 0", result.Text);
 
         var initialSolution = testLspServer.GetCurrentSolution();
         var initialExecutionMap = initialSolution.CompilationState.SourceGeneratorExecutionVersionMap.Map;
@@ -259,20 +243,17 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
 
         var solutionWithChangedExecutionVersion = testLspServer.GetCurrentSolution();
 
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-        AssertEx.NotNull(secondRequest);
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(secondResult);
 
         if (forceRegeneration)
         {
-            Assert.NotEqual(text.ResultId, secondRequest.ResultId);
-            Assert.Equal("// callCount: 1", secondRequest.Text);
+            Assert.Equal("// callCount: 1", secondResult.Text);
         }
         else
         {
             // There are no changes, so source generators won't actually run if we didn't force regeneration
-            Assert.Equal(text.ResultId, secondRequest.ResultId);
-            Assert.Null(secondRequest.Text);
+            Assert.Equal("// callCount: 0", secondResult.Text);
         }
 
         var projectId1 = initialSolution.ProjectIds.Single();
@@ -320,7 +301,7 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
     }
 
     [Theory, CombinatorialData]
-    public async Task TestReturnsNullForRemovedClosedGeneratedFile(bool mutatingLspWorkspace)
+    public async Task TestReturnsEmptyForRemovedClosedGeneratedFile(bool mutatingLspWorkspace)
     {
         var generatorText = "// Hello, World";
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
@@ -330,23 +311,21 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
-        AssertEx.NotNull(text);
-        Assert.Equal("// Hello, World", text.Text);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Hello, World", result.Text);
 
-        // Remove the generator and verify that we get null text back.
+        // Remove the generator - the document is not opened so it will no longer exist in the workspace.
+        // The handler should return an error since the document cannot be found.
         await RemoveGeneratorAsync(generatorReference, testLspServer.TestWorkspace);
 
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-
-        Assert.NotNull(secondRequest);
-        Assert.Null(secondRequest.Text);
+        var exception = await Assert.ThrowsAsync<StreamJsonRpc.RemoteInvocationException>(
+            () => GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri));
+        Assert.NotNull(exception);
     }
 
     [Theory, CombinatorialData]
-    public async Task TestReturnsNullForRemovedOpenedGeneratedFile(bool mutatingLspWorkspace)
+    public async Task TestReturnsEmptyForRemovedOpenedGeneratedFile(bool mutatingLspWorkspace)
     {
         var generatorText = "// Hello, World";
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
@@ -356,23 +335,91 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
-        AssertEx.NotNull(text);
-        Assert.Equal("// Hello, World", text.Text);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Hello, World", result.Text);
 
         // Open the document - this will cause the queue to generate frozen sg documents based on the LSP open text
         // even if the source generator is removed entirely.
-        await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, text.Text);
+        await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, result.Text);
 
-        // Remove the generator - the handler should return null text.
+        // Remove the generator - the handler should return empty text since the unfrozen document no longer exists.
         await RemoveGeneratorAsync(generatorReference, testLspServer.TestWorkspace);
 
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        Assert.NotNull(secondRequest);
-        Assert.Null(secondRequest.Text);
+        Assert.NotNull(secondResult);
+        Assert.Empty(secondResult.Text);
+    }
+
+    [Theory, CombinatorialData]
+    public async Task TestRemovedGeneratedFileHasFrozenEmptyText(bool mutatingLspWorkspace)
+    {
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
+
+        var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
+        configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: SourceGeneratorExecutionPreference.Automatic);
+
+        var iteration = 0;
+        var callbackGenerator = new CallbackGenerator(() =>
+        {
+            var result = ($"hintName-{iteration}.cs", $"// Iteration {iteration}");
+            iteration++;
+            return result;
+        });
+        var generatorReference = await AddGeneratorAsync(callbackGenerator, testLspServer.TestWorkspace);
+
+        var sourceGeneratedDocuments = await testLspServer.GetCurrentSolution().Projects.Single().GetSourceGeneratedDocumentsAsync();
+        var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
+        var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
+
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(result);
+        Assert.Equal("// Iteration 0", result.Text);
+
+        // Open the document - this will cause the queue to generate frozen sg documents based on the LSP open text
+        // even if the source generator is removed entirely.
+        await testLspServer.OpenDocumentAsync(sourceGeneratorDocumentUri, result.Text);
+
+        // Get the document from the manager to verify it has the text we opened it with.  This should also trigger a cached solution.
+        var identifier = new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri };
+        var (_, _, sgDoc) = await testLspServer.GetManager().GetLspDocumentInfoAsync(identifier, CancellationToken.None);
+        AssertEx.NotNull(sgDoc);
+        var sgText = await sgDoc.GetTextAsync(CancellationToken.None);
+        Assert.Equal(result.Text, sgText.ToString());
+
+        // Updating the execution version should trigger source generators to run and generate a new document with new name.
+        await testLspServer.RefreshSourceGeneratorsAsync(forceRegeneration: true);
+
+        // The old source generated document should be removed and return empty text.
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        Assert.NotNull(secondResult);
+        Assert.Empty(secondResult.Text);
+
+        // Before the client updates the file with the new text, make a request for a document to ensure we have an updated forked, cached solution.
+        // This should be the same document as before since the client hasn't updated the file with the new text yet.
+        var (_, _, frozenSgDoc) = await testLspServer.GetManager().GetLspDocumentInfoAsync(identifier, CancellationToken.None);
+        AssertEx.NotNull(frozenSgDoc);
+        var frozenSgText = await frozenSgDoc.GetTextAsync(CancellationToken.None);
+        Assert.Equal(result.Text, frozenSgText.ToString());
+
+        // Update the server with the new frozen text.
+        var originalText = SourceText.From(result.Text);
+        var originalSpan = originalText.Lines.GetLinePositionSpan(new TextSpan(0, originalText.Length));
+
+        await testLspServer.ReplaceTextAsync(
+            sourceGeneratorDocumentUri,
+            (new LSP.Range
+            {
+                Start = new LSP.Position(originalSpan.Start.Line, originalSpan.Start.Character),
+                End = new LSP.Position(originalSpan.End.Line, originalSpan.End.Character)
+            }, secondResult.Text));
+
+        // Followup requests should see the old source generated document with empty text.
+        var (_, _, updatedSgDoc) = await testLspServer.GetManager().GetLspDocumentInfoAsync(identifier, CancellationToken.None);
+        AssertEx.NotNull(updatedSgDoc);
+        var updatedText = await updatedSgDoc.GetTextAsync(CancellationToken.None);
+        Assert.Equal(secondResult.Text, updatedText.ToString());
     }
 
     [Theory, CombinatorialData]
@@ -392,11 +439,10 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var sourceGeneratedDocumentIdentity = sourceGeneratedDocuments.Single().Identity;
         var sourceGeneratorDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocumentIdentity);
 
-        var text = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: null), CancellationToken.None);
+        var result = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
 
-        AssertEx.NotNull(text);
-        Assert.Equal("// callCount: 0", text.Text);
+        AssertEx.NotNull(result);
+        Assert.Equal("// callCount: 0", result.Text);
 
         await testLspServer.OpenDocumentAsync(documentUri, string.Empty);
 
@@ -406,17 +452,15 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await testLspServer.TestWorkspace.ChangeDocumentAsync(document.Id, SourceText.From("new text"));
         await testLspServer.WaitForSourceGeneratorsAsync();
 
-        var secondRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-        AssertEx.NotNull(secondRequest);
+        var secondResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(secondResult);
         if (sourceGeneratorExecution == SourceGeneratorExecutionPreference.Automatic)
         {
-            Assert.NotEqual(text.ResultId, secondRequest.ResultId);
-            Assert.Equal("// callCount: 1", secondRequest.Text);
+            Assert.Equal("// callCount: 1", secondResult.Text);
         }
         else
         {
-            Assert.Equal(text.ResultId, secondRequest.ResultId);
+            Assert.Equal("// callCount: 0", secondResult.Text);
         }
 
         var didSaveParams = new LSP.DidSaveTextDocumentParams
@@ -428,11 +472,9 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await testLspServer.ExecuteRequestAsync<LSP.DidSaveTextDocumentParams, object>(LSP.Methods.TextDocumentDidSaveName, didSaveParams, CancellationToken.None);
         await testLspServer.WaitForSourceGeneratorsAsync();
 
-        var thirdRequest = await testLspServer.ExecuteRequestAsync<SourceGeneratorGetTextParams, SourceGeneratedDocumentText>(SourceGeneratedDocumentGetTextHandler.MethodName,
-            new SourceGeneratorGetTextParams(new LSP.TextDocumentIdentifier { DocumentUri = sourceGeneratorDocumentUri }, ResultId: text.ResultId), CancellationToken.None);
-        AssertEx.NotNull(thirdRequest);
-        Assert.NotEqual(secondRequest.ResultId, thirdRequest.ResultId);
-        Assert.Equal("// callCount: 1", thirdRequest.Text);
+        var thirdResult = await GetSourceGeneratedDocumentTextAsync(testLspServer, sourceGeneratorDocumentUri);
+        AssertEx.NotNull(thirdResult);
+        Assert.Equal("// callCount: 1", thirdResult.Text);
     }
 
     private async Task<TestLspServer> CreateTestLspServerWithGeneratorAsync(
@@ -442,5 +484,13 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
         await AddGeneratorAsync(new SingleFileTestGenerator(generatedDocumentText), testLspServer.TestWorkspace);
         return testLspServer;
+    }
+
+    private static Task<LSP.TextDocumentContentResult?> GetSourceGeneratedDocumentTextAsync(TestLspServer testLspServer, LSP.DocumentUri documentUri)
+    {
+        return testLspServer.ExecuteRequestAsync<LSP.TextDocumentContentParams, LSP.TextDocumentContentResult>(
+            LSP.Methods.WorkspaceTextDocumentContentName,
+            new LSP.TextDocumentContentParams { Uri = documentUri },
+            CancellationToken.None);
     }
 }
