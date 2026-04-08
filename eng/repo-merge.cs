@@ -23,8 +23,9 @@ static class RepoMergeScaffold
     private const string DefaultTargetPath = @"src\Razor";
     private const string DefaultStateRoot = @"artifacts\repo-merge";
     private const string DefaultWorkRoot = @"..\repo-merge-work";
+    private const string DefaultScriptRoot = @"eng\repo-merge-scripts";
     private const int StateSchemaVersion = 1;
-    private const string WorkflowVersion = "clone-stage-v1";
+    private const string WorkflowVersion = "prepare-stage-v1";
 
     private static readonly JsonSerializerOptions s_jsonOptions = new()
     {
@@ -48,9 +49,9 @@ static class RepoMergeScaffold
             "Clone or refresh the source repository in an external work area.",
             CloneSourceAsync),
         new(
-            "trim-history",
-            "Scaffold placeholder for trimming source history before import.",
-            TrimHistoryAsync),
+            "prepare-source",
+            "Run the repo-specific prepare.cs and validate.cs scripts against the external clone.",
+            PrepareSourceAsync),
         new(
             "merge-into-roslyn",
             "Scaffold placeholder for importing the prepared repo into the target path.",
@@ -86,6 +87,16 @@ static class RepoMergeScaffold
         var workRootOption = new Option<string?>("--work-root")
         {
             Description = $"Directory for external working repos (default: '{DefaultWorkRoot}'). Must resolve outside the roslyn repo.",
+        };
+
+        var scriptRootOption = new Option<string?>("--script-root")
+        {
+            Description = $"Directory containing per-repo merge scripts (default: '{DefaultScriptRoot}').",
+        };
+
+        var scriptSetOption = new Option<string?>("--script-set")
+        {
+            Description = "Name of the repo-specific script folder to use. Defaults to the source repo name (for example 'razor').",
         };
 
         var runNameOption = new Option<string?>("--run-name")
@@ -140,6 +151,8 @@ static class RepoMergeScaffold
             targetPathOption,
             stateRootOption,
             workRootOption,
+            scriptRootOption,
+            scriptSetOption,
             runNameOption,
             stageOption,
             startAtOption,
@@ -165,6 +178,8 @@ static class RepoMergeScaffold
             TargetPath: parseResult.GetValue(targetPathOption) ?? DefaultTargetPath,
             StateRoot: parseResult.GetValue(stateRootOption) ?? DefaultStateRoot,
             WorkRoot: parseResult.GetValue(workRootOption) ?? DefaultWorkRoot,
+            ScriptRoot: parseResult.GetValue(scriptRootOption) ?? DefaultScriptRoot,
+            ScriptSet: parseResult.GetValue(scriptSetOption),
             RunName: parseResult.GetValue(runNameOption),
             Stage: parseResult.GetValue(stageOption),
             StartAt: parseResult.GetValue(startAtOption),
@@ -201,6 +216,9 @@ static class RepoMergeScaffold
         var stateRoot = GetAbsolutePath(repoRoot, settings.StateRoot);
         var workRoot = GetAbsolutePath(repoRoot, settings.WorkRoot);
         EnsurePathIsOutsideRepo(repoRoot, workRoot, "--work-root");
+        var scriptRoot = GetAbsolutePath(repoRoot, settings.ScriptRoot);
+        var scriptSet = GetScriptSetName(settings);
+        var scriptDirectory = Path.Combine(scriptRoot, scriptSet);
         var runDirectory = Path.Combine(stateRoot, runName);
         var workDirectory = Path.Combine(workRoot, runName);
 
@@ -240,13 +258,16 @@ static class RepoMergeScaffold
         state.TargetPath = settings.TargetPath;
         state.StateRoot = stateRoot;
         state.WorkRoot = workRoot;
+        state.ScriptRoot = scriptRoot;
+        state.ScriptSet = scriptSet;
+        state.ScriptDirectory = scriptDirectory;
         state.RunName = runName;
         state.RunDirectory = runDirectory;
         state.WorkDirectory = workDirectory;
         state.RepoRoot = repoRoot;
         state.SourceRemoteUri = ResolveSourceRepositoryUri(settings.SourceRepo, repoRoot);
         state.SourceCloneDirectory = Path.Combine(workDirectory, "source");
-        state.TrimmedDirectory = Path.Combine(workDirectory, "trimmed");
+        state.PreparedSourceDirectory = Path.Combine(workDirectory, "prepared-source");
         state.ImportPreviewDirectory = Path.Combine(workDirectory, "import-preview");
         state.WorkflowVersion = WorkflowVersion;
         state.DryRun = settings.DryRun;
@@ -434,6 +455,8 @@ static class RepoMergeScaffold
         ValidateMatchingSetting(state.TargetPath, settings.TargetPath, nameof(settings.TargetPath));
         ValidateMatchingSetting(state.RepoRoot, repoRoot, nameof(repoRoot));
         ValidateMatchingSetting(state.WorkRoot, GetAbsolutePath(repoRoot, settings.WorkRoot), nameof(settings.WorkRoot));
+        ValidateMatchingSetting(state.ScriptRoot, GetAbsolutePath(repoRoot, settings.ScriptRoot), nameof(settings.ScriptRoot));
+        ValidateMatchingSetting(state.ScriptSet, GetScriptSetName(settings), nameof(settings.ScriptSet));
     }
 
     private static void ValidateMatchingSetting(string existingValue, string currentValue, string name)
@@ -532,6 +555,7 @@ static class RepoMergeScaffold
         var status = await RunProcessAsync("git", ["status", "--short", "--untracked-files=no"], context.RepoRoot).ConfigureAwait(false);
         context.Logger.Info($"Resolved target path: {fullTargetPath}");
         context.Logger.Info($"Resolved external work root: {fullWorkRoot}");
+        context.Logger.Info($"Using script directory: {context.State.ScriptDirectory}");
         if (!string.IsNullOrWhiteSpace(status.Output))
             context.Logger.Info("Git working tree has existing changes; the scaffold recorded them but does not modify the repo yet.");
 
@@ -555,6 +579,10 @@ static class RepoMergeScaffold
             context.State.WorkRoot,
             context.State.WorkDirectory,
             context.State.SourceCloneDirectory,
+            context.State.PreparedSourceDirectory,
+            context.State.ScriptRoot,
+            context.State.ScriptSet,
+            context.State.ScriptDirectory,
             context.Settings.DryRun,
             selectedStages = new
             {
@@ -634,14 +662,37 @@ static class RepoMergeScaffold
         return $"Cloned/refreshed '{context.Settings.SourceRepo}' into '{sourceDirectory}' at commit '{context.State.SourceHeadCommit}'.";
     }
 
-    private static Task<string> TrimHistoryAsync(StageContext context)
+    private static async Task<string> PrepareSourceAsync(StageContext context)
     {
-        var trimmedDirectory = context.State.TrimmedDirectory;
-        Directory.CreateDirectory(trimmedDirectory);
+        var scriptDirectory = context.State.ScriptDirectory;
+        if (!Directory.Exists(scriptDirectory))
+        {
+            throw new InvalidOperationException(
+                $"The script directory '{scriptDirectory}' does not exist. " +
+                "Add repo-specific scripts like prepare.cs and validate.cs or override it with --script-set/--script-root.");
+        }
 
-        return Task.FromResult(
-            "Scaffold placeholder only. A future milestone will trim the cloned repo history here " +
-            "before the import step runs.");
+        if (!Directory.Exists(context.State.SourceCloneDirectory))
+        {
+            throw new InvalidOperationException(
+                $"The source clone directory '{context.State.SourceCloneDirectory}' does not exist. " +
+                "Run the clone-source stage first.");
+        }
+
+        Directory.CreateDirectory(context.State.PreparedSourceDirectory);
+
+        var summaries = new List<string>();
+        summaries.AddRange(await RunRepoScriptIfPresentAsync(context, "prepare.cs").ConfigureAwait(false));
+        summaries.AddRange(await RunRepoScriptIfPresentAsync(context, "validate.cs").ConfigureAwait(false));
+
+        if (summaries.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"No prepare.cs or validate.cs script was found in '{scriptDirectory}'. " +
+                "Add at least one repo-specific script for this stage.");
+        }
+
+        return string.Join(" ", summaries);
     }
 
     private static Task<string> MergeIntoRoslynAsync(StageContext context)
@@ -666,6 +717,8 @@ static class RepoMergeScaffold
         summary.AppendLine($"Target path      : {context.Settings.TargetPath}");
         summary.AppendLine($"Work root        : {context.State.WorkRoot}");
         summary.AppendLine($"Clone directory  : {context.State.SourceCloneDirectory}");
+        summary.AppendLine($"Prepared source  : {context.State.PreparedSourceDirectory}");
+        summary.AppendLine($"Script directory : {context.State.ScriptDirectory}");
         summary.AppendLine($"Source HEAD      : {context.State.SourceHeadCommit}");
         summary.AppendLine($"Dry run          : {context.Settings.DryRun}");
         summary.AppendLine($"State file       : {context.StatePath}");
@@ -674,8 +727,9 @@ static class RepoMergeScaffold
         summary.AppendLine("Available follow-up commands:");
         summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --resume");
         summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --stage clone-source --rerun");
+        summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --stage prepare-source --rerun");
         summary.AppendLine();
-        summary.AppendLine("Current status: the external source-clone stage is implemented; trim/import are still placeholders.");
+        summary.AppendLine("Current status: the external clone and repo-specific prepare/validate stages are implemented.");
 
         var summaryPath = Path.Combine(context.RunDirectory, "summary.txt");
         await File.WriteAllTextAsync(summaryPath, summary.ToString()).ConfigureAwait(false);
@@ -698,6 +752,15 @@ static class RepoMergeScaffold
 
     private static string GetDefaultRunName(string sourceRepo, string targetPath)
         => SanitizePathSegment($"{sourceRepo}-to-{targetPath}");
+
+    private static string GetScriptSetName(MergeSettings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.ScriptSet))
+            return SanitizePathSegment(settings.ScriptSet);
+
+        var repoName = Path.GetFileName(settings.SourceRepo.Replace('/', Path.DirectorySeparatorChar));
+        return SanitizePathSegment(repoName);
+    }
 
     private static string SanitizePathSegment(string value)
     {
@@ -750,6 +813,26 @@ static class RepoMergeScaffold
             || value.Contains(':')
             || value.StartsWith(".", StringComparison.Ordinal);
 
+    private static async Task<IReadOnlyList<string>> RunRepoScriptIfPresentAsync(StageContext context, string scriptFileName)
+    {
+        var scriptPath = Path.Combine(context.State.ScriptDirectory, scriptFileName);
+        if (!File.Exists(scriptPath))
+            return [];
+
+        var logSafeName = Path.GetFileNameWithoutExtension(scriptFileName);
+        var logPath = Path.Combine(context.RunDirectory, "notes", $"{logSafeName}.log");
+
+        context.Logger.Info($"Running repo-specific script '{scriptPath}' against '{context.State.SourceCloneDirectory}'.");
+        var result = await RunProcessAsync(
+            "dotnet",
+            ["run", "--file", scriptPath, "--", context.State.SourceCloneDirectory],
+            context.State.SourceCloneDirectory).ConfigureAwait(false);
+        await File.WriteAllTextAsync(logPath, result.Output).ConfigureAwait(false);
+        EnsureCommandSucceeded(result, $"dotnet run --file {scriptPath}");
+
+        return [$"Ran {scriptFileName} successfully."];
+    }
+
     private static string ResolveSourceRepositoryUri(string sourceRepo, string repoRoot)
         => LooksLikeLocalPath(sourceRepo)
             ? GetAbsolutePath(repoRoot, sourceRepo)
@@ -799,7 +882,10 @@ static class RepoMergeScaffold
             $"{commandName} failed with exit code {result.ExitCode}:{Environment.NewLine}{result.Output.Trim()}");
     }
 
-    private static async Task<ProcessResult> RunProcessAsync(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
+    private static async Task<ProcessResult> RunProcessAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string workingDirectory)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -832,6 +918,8 @@ readonly record struct MergeSettings(
     string TargetPath,
     string StateRoot,
     string WorkRoot,
+    string ScriptRoot,
+    string? ScriptSet,
     string? RunName,
     string? Stage,
     string? StartAt,
@@ -866,12 +954,15 @@ sealed class MergeRunState
     public string TargetPath { get; set; } = string.Empty;
     public string StateRoot { get; set; } = string.Empty;
     public string WorkRoot { get; set; } = string.Empty;
+    public string ScriptRoot { get; set; } = string.Empty;
+    public string ScriptSet { get; set; } = string.Empty;
+    public string ScriptDirectory { get; set; } = string.Empty;
     public string RunDirectory { get; set; } = string.Empty;
     public string WorkDirectory { get; set; } = string.Empty;
     public string RepoRoot { get; set; } = string.Empty;
     public string SourceRemoteUri { get; set; } = string.Empty;
     public string SourceCloneDirectory { get; set; } = string.Empty;
-    public string TrimmedDirectory { get; set; } = string.Empty;
+    public string PreparedSourceDirectory { get; set; } = string.Empty;
     public string ImportPreviewDirectory { get; set; } = string.Empty;
     public string SourceHeadCommit { get; set; } = string.Empty;
     public bool DryRun { get; set; }

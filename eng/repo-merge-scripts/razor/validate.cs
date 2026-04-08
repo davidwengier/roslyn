@@ -1,0 +1,65 @@
+﻿#!/usr/bin/env dotnet
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
+
+try
+{
+    if (args.Length != 1 || string.IsNullOrWhiteSpace(args[0]))
+        throw new InvalidOperationException("Usage: dotnet run --file validate.cs -- <source-root>");
+
+    var sourceRoot = Path.GetFullPath(args[0]);
+    if (!Directory.Exists(sourceRoot))
+        throw new InvalidOperationException($"Source root '{sourceRoot}' does not exist.");
+
+    var buildScript = Path.Combine(sourceRoot, "build.cmd");
+    if (!File.Exists(buildScript))
+        throw new InvalidOperationException($"Expected '{buildScript}' to exist.");
+
+    Console.WriteLine($"Validating Razor source repo at '{sourceRoot}'.");
+
+    // Keep validation intentionally simple: if `build.cmd -restore` works, the repo is good
+    // enough for the merge flow to continue.
+    await RunBuildAsync(sourceRoot).ConfigureAwait(false);
+
+    Console.WriteLine("Razor source repo validation completed successfully.");
+    return 0;
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"ERROR: {ex.Message}");
+    return 1;
+}
+
+static async Task RunBuildAsync(string workingDirectory)
+{
+    var startInfo = new ProcessStartInfo
+    {
+        FileName = "cmd.exe",
+        WorkingDirectory = workingDirectory,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+    };
+
+    startInfo.ArgumentList.Add("/c");
+    startInfo.ArgumentList.Add("build.cmd");
+
+    Console.WriteLine("> build.cmd");
+
+    using var process = Process.Start(startInfo)
+        ?? throw new InvalidOperationException("Failed to start 'build.cmd'.");
+
+    var standardOutputTask = process.StandardOutput.ReadToEndAsync();
+    var standardErrorTask = process.StandardError.ReadToEndAsync();
+    await process.WaitForExitAsync().ConfigureAwait(false);
+
+    var output = (await standardOutputTask.ConfigureAwait(false)) + (await standardErrorTask.ConfigureAwait(false));
+    Console.WriteLine(output.TrimEnd());
+
+    if (process.ExitCode != 0)
+        throw new InvalidOperationException($"build.cmd -restore failed with exit code {process.ExitCode}.");
+}
