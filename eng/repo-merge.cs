@@ -22,8 +22,9 @@ static class RepoMergeScaffold
     private const string DefaultSourceBranch = "main";
     private const string DefaultTargetPath = @"src\Razor";
     private const string DefaultStateRoot = @"artifacts\repo-merge";
+    private const string DefaultWorkRoot = @"..\repo-merge-work";
     private const int StateSchemaVersion = 1;
-    private const string WorkflowVersion = "scaffold-v1";
+    private const string WorkflowVersion = "clone-stage-v1";
 
     private static readonly JsonSerializerOptions s_jsonOptions = new()
     {
@@ -40,11 +41,11 @@ static class RepoMergeScaffold
             ValidateEnvironmentAsync),
         new(
             "prepare-state",
-            "Create the state, log, scratch, and sentinel layout for the run.",
+            "Create the persisted state, sentinel, and external work-area layout for the run.",
             PrepareStateAsync),
         new(
             "clone-source",
-            "Scaffold placeholder for cloning or refreshing the source repository.",
+            "Clone or refresh the source repository in an external work area.",
             CloneSourceAsync),
         new(
             "trim-history",
@@ -80,6 +81,11 @@ static class RepoMergeScaffold
         var stateRootOption = new Option<string?>("--state-root")
         {
             Description = $"Directory for persisted run state (default: '{DefaultStateRoot}').",
+        };
+
+        var workRootOption = new Option<string?>("--work-root")
+        {
+            Description = $"Directory for external working repos (default: '{DefaultWorkRoot}'). Must resolve outside the roslyn repo.",
         };
 
         var runNameOption = new Option<string?>("--run-name")
@@ -127,12 +133,13 @@ static class RepoMergeScaffold
             Description = "Delete any existing state for the selected run before starting over.",
         };
 
-        var rootCommand = new RootCommand("Scaffold the repeatable repo-merge workflow with persisted stage state.")
+        var rootCommand = new RootCommand("Run the repeatable repo-merge workflow with persisted stage state.")
         {
             sourceRepoOption,
             sourceBranchOption,
             targetPathOption,
             stateRootOption,
+            workRootOption,
             runNameOption,
             stageOption,
             startAtOption,
@@ -157,6 +164,7 @@ static class RepoMergeScaffold
             SourceBranch: parseResult.GetValue(sourceBranchOption) ?? DefaultSourceBranch,
             TargetPath: parseResult.GetValue(targetPathOption) ?? DefaultTargetPath,
             StateRoot: parseResult.GetValue(stateRootOption) ?? DefaultStateRoot,
+            WorkRoot: parseResult.GetValue(workRootOption) ?? DefaultWorkRoot,
             RunName: parseResult.GetValue(runNameOption),
             Stage: parseResult.GetValue(stageOption),
             StartAt: parseResult.GetValue(startAtOption),
@@ -191,13 +199,19 @@ static class RepoMergeScaffold
             ? GetDefaultRunName(settings.SourceRepo, settings.TargetPath)
             : SanitizePathSegment(settings.RunName);
         var stateRoot = GetAbsolutePath(repoRoot, settings.StateRoot);
+        var workRoot = GetAbsolutePath(repoRoot, settings.WorkRoot);
+        EnsurePathIsOutsideRepo(repoRoot, workRoot, "--work-root");
         var runDirectory = Path.Combine(stateRoot, runName);
+        var workDirectory = Path.Combine(workRoot, runName);
 
         if (settings.Reset && Directory.Exists(runDirectory))
             Directory.Delete(runDirectory, recursive: true);
+        if (settings.Reset && Directory.Exists(workDirectory))
+            Directory.Delete(workDirectory, recursive: true);
 
         Directory.CreateDirectory(runDirectory);
         Directory.CreateDirectory(Path.Combine(runDirectory, "logs"));
+        Directory.CreateDirectory(workDirectory);
 
         var logger = new RunLogger(Path.Combine(runDirectory, "logs", "run.log"));
         logger.Info($"Starting repo-merge scaffold '{runName}' (workflow version {WorkflowVersion}).");
@@ -225,9 +239,15 @@ static class RepoMergeScaffold
         state.SourceBranch = settings.SourceBranch;
         state.TargetPath = settings.TargetPath;
         state.StateRoot = stateRoot;
+        state.WorkRoot = workRoot;
         state.RunName = runName;
         state.RunDirectory = runDirectory;
+        state.WorkDirectory = workDirectory;
         state.RepoRoot = repoRoot;
+        state.SourceRemoteUri = ResolveSourceRepositoryUri(settings.SourceRepo, repoRoot);
+        state.SourceCloneDirectory = Path.Combine(workDirectory, "source");
+        state.TrimmedDirectory = Path.Combine(workDirectory, "trimmed");
+        state.ImportPreviewDirectory = Path.Combine(workDirectory, "import-preview");
         state.WorkflowVersion = WorkflowVersion;
         state.DryRun = settings.DryRun;
         state.SelectedStartStage = executionPlan.StartStageName;
@@ -413,6 +433,7 @@ static class RepoMergeScaffold
         ValidateMatchingSetting(state.SourceBranch, settings.SourceBranch, nameof(settings.SourceBranch));
         ValidateMatchingSetting(state.TargetPath, settings.TargetPath, nameof(settings.TargetPath));
         ValidateMatchingSetting(state.RepoRoot, repoRoot, nameof(repoRoot));
+        ValidateMatchingSetting(state.WorkRoot, GetAbsolutePath(repoRoot, settings.WorkRoot), nameof(settings.WorkRoot));
     }
 
     private static void ValidateMatchingSetting(string existingValue, string currentValue, string name)
@@ -484,11 +505,14 @@ static class RepoMergeScaffold
             throw new InvalidOperationException("--target-path must not be empty.");
 
         var fullTargetPath = GetAbsolutePath(context.RepoRoot, context.Settings.TargetPath);
+        var fullWorkRoot = GetAbsolutePath(context.RepoRoot, context.Settings.WorkRoot);
         if (!IsPathWithinRoot(context.RepoRoot, fullTargetPath))
             throw new InvalidOperationException($"The target path '{context.Settings.TargetPath}' escapes the repo root.");
 
         if (Path.IsPathRooted(context.Settings.TargetPath))
             throw new InvalidOperationException("--target-path must be relative to the roslyn repo root.");
+
+        EnsurePathIsOutsideRepo(context.RepoRoot, fullWorkRoot, "--work-root");
 
         if (LooksLikeLocalPath(context.Settings.SourceRepo))
         {
@@ -507,6 +531,7 @@ static class RepoMergeScaffold
 
         var status = await RunProcessAsync("git", ["status", "--short", "--untracked-files=no"], context.RepoRoot).ConfigureAwait(false);
         context.Logger.Info($"Resolved target path: {fullTargetPath}");
+        context.Logger.Info($"Resolved external work root: {fullWorkRoot}");
         if (!string.IsNullOrWhiteSpace(status.Output))
             context.Logger.Info("Git working tree has existing changes; the scaffold recorded them but does not modify the repo yet.");
 
@@ -516,8 +541,9 @@ static class RepoMergeScaffold
     private static async Task<string> PrepareStateAsync(StageContext context)
     {
         Directory.CreateDirectory(Path.Combine(context.RunDirectory, "sentinels"));
-        Directory.CreateDirectory(Path.Combine(context.RunDirectory, "scratch"));
         Directory.CreateDirectory(Path.Combine(context.RunDirectory, "notes"));
+        Directory.CreateDirectory(context.State.WorkDirectory);
+        Directory.CreateDirectory(Path.GetDirectoryName(context.State.SourceCloneDirectory)!);
 
         var manifest = new
         {
@@ -526,6 +552,9 @@ static class RepoMergeScaffold
             context.Settings.SourceRepo,
             context.Settings.SourceBranch,
             context.Settings.TargetPath,
+            context.State.WorkRoot,
+            context.State.WorkDirectory,
+            context.State.SourceCloneDirectory,
             context.Settings.DryRun,
             selectedStages = new
             {
@@ -537,22 +566,77 @@ static class RepoMergeScaffold
         var manifestPath = Path.Combine(context.RunDirectory, "inputs.json");
         await File.WriteAllTextAsync(manifestPath, JsonSerializer.Serialize(manifest, s_jsonOptions)).ConfigureAwait(false);
 
-        return $"Prepared persisted state layout under '{context.RunDirectory}'.";
+        return $"Prepared persisted state under '{context.RunDirectory}' and external work area '{context.State.WorkDirectory}'.";
     }
 
-    private static Task<string> CloneSourceAsync(StageContext context)
+    private static async Task<string> CloneSourceAsync(StageContext context)
     {
-        var sourceDirectory = Path.Combine(context.RunDirectory, "scratch", "source");
-        Directory.CreateDirectory(sourceDirectory);
+        var sourceDirectory = context.State.SourceCloneDirectory;
+        var sourceRemoteUri = context.State.SourceRemoteUri;
+        Directory.CreateDirectory(Path.GetDirectoryName(sourceDirectory)!);
 
-        return Task.FromResult(
-            $"Scaffold placeholder only. A future milestone will clone '{context.Settings.SourceRepo}' " +
-            $"(branch '{context.Settings.SourceBranch}') into '{sourceDirectory}'.");
+        if (context.Settings.DryRun)
+        {
+            return $"Dry run: would clone or refresh '{context.Settings.SourceRepo}' from '{sourceRemoteUri}' into '{sourceDirectory}'.";
+        }
+
+        if (!Directory.Exists(sourceDirectory))
+        {
+            var cloneArguments = new List<string>
+            {
+                "clone",
+                "--origin", "source",
+                "--branch", context.Settings.SourceBranch,
+            };
+
+            if (LooksLikeLocalPath(context.Settings.SourceRepo))
+                cloneArguments.Add("--no-hardlinks");
+
+            cloneArguments.Add(sourceRemoteUri);
+            cloneArguments.Add(sourceDirectory);
+
+            context.Logger.Info($"Cloning '{sourceRemoteUri}' into '{sourceDirectory}'.");
+            var cloneResult = await RunProcessAsync("git", cloneArguments, context.State.WorkDirectory).ConfigureAwait(false);
+            EnsureCommandSucceeded(cloneResult, "git clone");
+        }
+        else
+        {
+            if (!IsGitRepository(sourceDirectory))
+                throw new InvalidOperationException($"The clone directory '{sourceDirectory}' already exists but is not a git repository.");
+
+            var remoteName = await GetPreferredRemoteNameAsync(sourceDirectory).ConfigureAwait(false);
+            var remoteUrlResult = await RunProcessAsync("git", ["remote", "get-url", remoteName], sourceDirectory).ConfigureAwait(false);
+            EnsureCommandSucceeded(remoteUrlResult, "git remote get-url");
+            var actualRemoteUri = remoteUrlResult.Output.Trim();
+            if (!RepositoryLocationsMatch(actualRemoteUri, sourceRemoteUri))
+            {
+                throw new InvalidOperationException(
+                    $"The existing clone at '{sourceDirectory}' points at '{actualRemoteUri}', not '{sourceRemoteUri}'. " +
+                    "Use --reset or a different --run-name to create a fresh working copy.");
+            }
+
+            context.Logger.Info($"Refreshing existing clone in '{sourceDirectory}' from remote '{remoteName}'.");
+
+            var fetchResult = await RunProcessAsync("git", ["fetch", remoteName, "--prune", "--tags"], sourceDirectory).ConfigureAwait(false);
+            EnsureCommandSucceeded(fetchResult, "git fetch");
+
+            var checkoutResult = await RunProcessAsync(
+                "git",
+                ["checkout", "-B", context.Settings.SourceBranch, $"{remoteName}/{context.Settings.SourceBranch}"],
+                sourceDirectory).ConfigureAwait(false);
+            EnsureCommandSucceeded(checkoutResult, "git checkout");
+        }
+
+        var headCommitResult = await RunProcessAsync("git", ["rev-parse", "HEAD"], sourceDirectory).ConfigureAwait(false);
+        EnsureCommandSucceeded(headCommitResult, "git rev-parse");
+        context.State.SourceHeadCommit = headCommitResult.Output.Trim();
+
+        return $"Cloned/refreshed '{context.Settings.SourceRepo}' into '{sourceDirectory}' at commit '{context.State.SourceHeadCommit}'.";
     }
 
     private static Task<string> TrimHistoryAsync(StageContext context)
     {
-        var trimmedDirectory = Path.Combine(context.RunDirectory, "scratch", "trimmed");
+        var trimmedDirectory = context.State.TrimmedDirectory;
         Directory.CreateDirectory(trimmedDirectory);
 
         return Task.FromResult(
@@ -562,7 +646,7 @@ static class RepoMergeScaffold
 
     private static Task<string> MergeIntoRoslynAsync(StageContext context)
     {
-        var importDirectory = Path.Combine(context.RunDirectory, "scratch", "import-preview");
+        var importDirectory = context.State.ImportPreviewDirectory;
         Directory.CreateDirectory(importDirectory);
 
         var fullTargetPath = GetAbsolutePath(context.RepoRoot, context.Settings.TargetPath);
@@ -580,6 +664,9 @@ static class RepoMergeScaffold
         summary.AppendLine($"Source repo      : {context.Settings.SourceRepo}");
         summary.AppendLine($"Source branch    : {context.Settings.SourceBranch}");
         summary.AppendLine($"Target path      : {context.Settings.TargetPath}");
+        summary.AppendLine($"Work root        : {context.State.WorkRoot}");
+        summary.AppendLine($"Clone directory  : {context.State.SourceCloneDirectory}");
+        summary.AppendLine($"Source HEAD      : {context.State.SourceHeadCommit}");
         summary.AppendLine($"Dry run          : {context.Settings.DryRun}");
         summary.AppendLine($"State file       : {context.StatePath}");
         summary.AppendLine($"Log file         : {context.Logger.LogPath}");
@@ -588,7 +675,7 @@ static class RepoMergeScaffold
         summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --resume");
         summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --stage clone-source --rerun");
         summary.AppendLine();
-        summary.AppendLine("This scaffold milestone only sets up the repeatable, resumable stage runner.");
+        summary.AppendLine("Current status: the external source-clone stage is implemented; trim/import are still placeholders.");
 
         var summaryPath = Path.Combine(context.RunDirectory, "summary.txt");
         await File.WriteAllTextAsync(summaryPath, summary.ToString()).ConfigureAwait(false);
@@ -637,6 +724,16 @@ static class RepoMergeScaffold
     private static string GetAbsolutePath(string repoRoot, string path)
         => Path.GetFullPath(Path.IsPathRooted(path) ? path : Path.Combine(repoRoot, path));
 
+    private static void EnsurePathIsOutsideRepo(string repoRoot, string candidatePath, string optionName)
+    {
+        if (IsPathWithinRoot(repoRoot, candidatePath))
+        {
+            throw new InvalidOperationException(
+                $"{optionName} resolved to '{candidatePath}', which is inside the roslyn repo. " +
+                "Choose a path outside the checkout so folder structure and repo-local configuration cannot interfere.");
+        }
+    }
+
     private static bool IsPathWithinRoot(string rootPath, string candidatePath)
     {
         var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(rootPath)) + Path.DirectorySeparatorChar;
@@ -652,6 +749,55 @@ static class RepoMergeScaffold
         => value.Contains('\\')
             || value.Contains(':')
             || value.StartsWith(".", StringComparison.Ordinal);
+
+    private static string ResolveSourceRepositoryUri(string sourceRepo, string repoRoot)
+        => LooksLikeLocalPath(sourceRepo)
+            ? GetAbsolutePath(repoRoot, sourceRepo)
+            : $"https://github.com/{sourceRepo}.git";
+
+    private static bool IsGitRepository(string directory)
+        => Directory.Exists(Path.Combine(directory, ".git")) || File.Exists(Path.Combine(directory, ".git"));
+
+    private static bool RepositoryLocationsMatch(string left, string right)
+        => string.Equals(NormalizeRepositoryLocation(left), NormalizeRepositoryLocation(right), StringComparison.OrdinalIgnoreCase);
+
+    private static string NormalizeRepositoryLocation(string value)
+    {
+        value = value.Trim().Replace('\\', '/');
+
+        if (value.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
+            value = value[..^4];
+
+        return value.TrimEnd('/');
+    }
+
+    private static async Task<string> GetPreferredRemoteNameAsync(string repositoryDirectory)
+    {
+        var remoteList = await RunProcessAsync("git", ["remote"], repositoryDirectory).ConfigureAwait(false);
+        EnsureCommandSucceeded(remoteList, "git remote");
+
+        var remotes = remoteList.Output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (remotes.Contains("source"))
+            return "source";
+
+        if (remotes.Contains("origin"))
+            return "origin";
+
+        throw new InvalidOperationException(
+            $"The repository at '{repositoryDirectory}' does not have a 'source' or 'origin' remote to refresh.");
+    }
+
+    private static void EnsureCommandSucceeded(ProcessResult result, string commandName)
+    {
+        if (result.ExitCode == 0)
+            return;
+
+        throw new InvalidOperationException(
+            $"{commandName} failed with exit code {result.ExitCode}:{Environment.NewLine}{result.Output.Trim()}");
+    }
 
     private static async Task<ProcessResult> RunProcessAsync(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
     {
@@ -685,6 +831,7 @@ readonly record struct MergeSettings(
     string SourceBranch,
     string TargetPath,
     string StateRoot,
+    string WorkRoot,
     string? RunName,
     string? Stage,
     string? StartAt,
@@ -718,8 +865,15 @@ sealed class MergeRunState
     public string SourceBranch { get; set; } = string.Empty;
     public string TargetPath { get; set; } = string.Empty;
     public string StateRoot { get; set; } = string.Empty;
+    public string WorkRoot { get; set; } = string.Empty;
     public string RunDirectory { get; set; } = string.Empty;
+    public string WorkDirectory { get; set; } = string.Empty;
     public string RepoRoot { get; set; } = string.Empty;
+    public string SourceRemoteUri { get; set; } = string.Empty;
+    public string SourceCloneDirectory { get; set; } = string.Empty;
+    public string TrimmedDirectory { get; set; } = string.Empty;
+    public string ImportPreviewDirectory { get; set; } = string.Empty;
+    public string SourceHeadCommit { get; set; } = string.Empty;
     public bool DryRun { get; set; }
     public string CurrentStage { get; set; } = string.Empty;
     public string LastCompletedStage { get; set; } = string.Empty;
