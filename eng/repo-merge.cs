@@ -265,9 +265,9 @@ static class RepoMergeScaffold
         state.RunDirectory = runDirectory;
         state.WorkDirectory = workDirectory;
         state.RepoRoot = repoRoot;
+        var sourceCloneDirectory = Path.Combine(workDirectory, "source");
         state.SourceRemoteUri = ResolveSourceRepositoryUri(settings.SourceRepo, repoRoot);
-        state.SourceCloneDirectory = Path.Combine(workDirectory, "source");
-        state.PreparedSourceDirectory = Path.Combine(workDirectory, "prepared-source");
+        state.SourceCloneDirectory = sourceCloneDirectory;
         state.ImportPreviewDirectory = Path.Combine(workDirectory, "import-preview");
         state.WorkflowVersion = WorkflowVersion;
         state.DryRun = settings.DryRun;
@@ -579,7 +579,6 @@ static class RepoMergeScaffold
             context.State.WorkRoot,
             context.State.WorkDirectory,
             context.State.SourceCloneDirectory,
-            context.State.PreparedSourceDirectory,
             context.State.ScriptRoot,
             context.State.ScriptSet,
             context.State.ScriptDirectory,
@@ -679,8 +678,6 @@ static class RepoMergeScaffold
                 "Run the clone-source stage first.");
         }
 
-        Directory.CreateDirectory(context.State.PreparedSourceDirectory);
-
         var summaries = new List<string>();
         summaries.AddRange(await RunRepoScriptIfPresentAsync(context, "prepare.cs").ConfigureAwait(false));
         summaries.AddRange(await RunRepoScriptIfPresentAsync(context, "validate.cs").ConfigureAwait(false));
@@ -717,7 +714,6 @@ static class RepoMergeScaffold
         summary.AppendLine($"Target path      : {context.Settings.TargetPath}");
         summary.AppendLine($"Work root        : {context.State.WorkRoot}");
         summary.AppendLine($"Clone directory  : {context.State.SourceCloneDirectory}");
-        summary.AppendLine($"Prepared source  : {context.State.PreparedSourceDirectory}");
         summary.AppendLine($"Script directory : {context.State.ScriptDirectory}");
         summary.AppendLine($"Source HEAD      : {context.State.SourceHeadCommit}");
         summary.AppendLine($"Dry run          : {context.Settings.DryRun}");
@@ -962,7 +958,6 @@ sealed class MergeRunState
     public string RepoRoot { get; set; } = string.Empty;
     public string SourceRemoteUri { get; set; } = string.Empty;
     public string SourceCloneDirectory { get; set; } = string.Empty;
-    public string PreparedSourceDirectory { get; set; } = string.Empty;
     public string ImportPreviewDirectory { get; set; } = string.Empty;
     public string SourceHeadCommit { get; set; } = string.Empty;
     public bool DryRun { get; set; }
