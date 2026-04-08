@@ -202,7 +202,7 @@ static class RepoMergeScaffold
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"ERROR: {ex.Message}");
+            Console.WriteLine($"ERROR: {ex.Message}");
             return 1;
         }
     }
@@ -228,11 +228,9 @@ static class RepoMergeScaffold
             Directory.Delete(workDirectory, recursive: true);
 
         Directory.CreateDirectory(runDirectory);
-        Directory.CreateDirectory(Path.Combine(runDirectory, "logs"));
         Directory.CreateDirectory(workDirectory);
 
-        var logger = new RunLogger(Path.Combine(runDirectory, "logs", "run.log"));
-        logger.Info($"Starting repo-merge scaffold '{runName}' (workflow version {WorkflowVersion}).");
+        Console.WriteLine($"Starting repo-merge scaffold '{runName}' (workflow version {WorkflowVersion}).");
 
         var executionPlan = CreateExecutionPlan(settings);
         var statePath = Path.Combine(runDirectory, "state.json");
@@ -277,18 +275,17 @@ static class RepoMergeScaffold
 
         await SaveStateAsync(statePath, state).ConfigureAwait(false);
 
-        logger.Info($"State file: {statePath}");
-        logger.Info($"Selected stages: {executionPlan.StartStageName} -> {executionPlan.StopStageName}");
+        Console.WriteLine($"State file: {statePath}");
+        Console.WriteLine($"Selected stages: {executionPlan.StartStageName} -> {executionPlan.StopStageName}");
         if (settings.DryRun)
-            logger.Info("Running in dry-run mode.");
+            Console.WriteLine("Running in dry-run mode.");
 
         var context = new StageContext(
             Settings: settings,
             RepoRoot: repoRoot,
             RunDirectory: runDirectory,
             StatePath: statePath,
-            State: state,
-            Logger: logger);
+            State: state);
 
         for (var i = executionPlan.StartIndex; i <= executionPlan.StopIndex; i++)
         {
@@ -297,7 +294,7 @@ static class RepoMergeScaffold
 
             if (record.Status == StageStatus.Completed && !settings.Rerun)
             {
-                logger.Info($"Skipping completed stage '{definition.Name}'.");
+                Console.WriteLine($"Skipping completed stage '{definition.Name}'.");
                 continue;
             }
 
@@ -311,7 +308,7 @@ static class RepoMergeScaffold
 
             try
             {
-                logger.Info($"Starting stage '{definition.Name}': {definition.Description}");
+                Console.WriteLine($"Starting stage '{definition.Name}': {definition.Description}");
                 var summary = await definition.ExecuteAsync(context).ConfigureAwait(false);
 
                 record.Status = StageStatus.Completed;
@@ -324,7 +321,7 @@ static class RepoMergeScaffold
                 await WriteSentinelAsync(runDirectory, definition, record).ConfigureAwait(false);
                 await SaveStateAsync(statePath, state).ConfigureAwait(false);
 
-                logger.Info($"Completed stage '{definition.Name}'.");
+                Console.WriteLine($"Completed stage '{definition.Name}'.");
             }
             catch (Exception ex)
             {
@@ -334,12 +331,12 @@ static class RepoMergeScaffold
                 state.UpdatedUtc = DateTimeOffset.UtcNow;
                 await SaveStateAsync(statePath, state).ConfigureAwait(false);
 
-                logger.Error($"Stage '{definition.Name}' failed: {ex.Message}");
+                Console.WriteLine($"Stage '{definition.Name}' failed: {ex.Message}");
                 return 1;
             }
         }
 
-        logger.Info("Repo-merge scaffold completed successfully.");
+        Console.WriteLine("Repo-merge scaffold completed successfully.");
         return 0;
     }
 
@@ -553,11 +550,11 @@ static class RepoMergeScaffold
             throw new InvalidOperationException($"`git --version` failed: {gitVersion.Output.Trim()}");
 
         var status = await RunProcessAsync("git", ["status", "--short", "--untracked-files=no"], context.RepoRoot).ConfigureAwait(false);
-        context.Logger.Info($"Resolved target path: {fullTargetPath}");
-        context.Logger.Info($"Resolved external work root: {fullWorkRoot}");
-        context.Logger.Info($"Using script directory: {context.State.ScriptDirectory}");
+        Console.WriteLine($"Resolved target path: {fullTargetPath}");
+        Console.WriteLine($"Resolved external work root: {fullWorkRoot}");
+        Console.WriteLine($"Using script directory: {context.State.ScriptDirectory}");
         if (!string.IsNullOrWhiteSpace(status.Output))
-            context.Logger.Info("Git working tree has existing changes; the scaffold recorded them but does not modify the repo yet.");
+            Console.WriteLine("Git working tree has existing changes; the scaffold recorded them but does not modify the repo yet.");
 
         return $"Validated repo root and inputs. Git: {gitVersion.Output.Trim()}";
     }
@@ -565,7 +562,6 @@ static class RepoMergeScaffold
     private static async Task<string> PrepareStateAsync(StageContext context)
     {
         Directory.CreateDirectory(Path.Combine(context.RunDirectory, "sentinels"));
-        Directory.CreateDirectory(Path.Combine(context.RunDirectory, "notes"));
         Directory.CreateDirectory(context.State.WorkDirectory);
         Directory.CreateDirectory(Path.GetDirectoryName(context.State.SourceCloneDirectory)!);
 
@@ -622,7 +618,7 @@ static class RepoMergeScaffold
             cloneArguments.Add(sourceRemoteUri);
             cloneArguments.Add(sourceDirectory);
 
-            context.Logger.Info($"Cloning '{sourceRemoteUri}' into '{sourceDirectory}'.");
+            Console.WriteLine($"Cloning '{sourceRemoteUri}' into '{sourceDirectory}'.");
             var cloneResult = await RunProcessAsync("git", cloneArguments, context.State.WorkDirectory).ConfigureAwait(false);
             EnsureCommandSucceeded(cloneResult, "git clone");
         }
@@ -642,7 +638,7 @@ static class RepoMergeScaffold
                     "Use --reset or a different --run-name to create a fresh working copy.");
             }
 
-            context.Logger.Info($"Refreshing existing clone in '{sourceDirectory}' from remote '{remoteName}'.");
+            Console.WriteLine($"Refreshing existing clone in '{sourceDirectory}' from remote '{remoteName}'.");
 
             var fetchResult = await RunProcessAsync("git", ["fetch", remoteName, "--prune", "--tags"], sourceDirectory).ConfigureAwait(false);
             EnsureCommandSucceeded(fetchResult, "git fetch");
@@ -718,7 +714,6 @@ static class RepoMergeScaffold
         summary.AppendLine($"Source HEAD      : {context.State.SourceHeadCommit}");
         summary.AppendLine($"Dry run          : {context.Settings.DryRun}");
         summary.AppendLine($"State file       : {context.StatePath}");
-        summary.AppendLine($"Log file         : {context.Logger.LogPath}");
         summary.AppendLine();
         summary.AppendLine("Available follow-up commands:");
         summary.AppendLine($@"  dotnet run --file eng\repo-merge.cs -- --run-name {context.State.RunName} --resume");
@@ -815,15 +810,11 @@ static class RepoMergeScaffold
         if (!File.Exists(scriptPath))
             return [];
 
-        var logSafeName = Path.GetFileNameWithoutExtension(scriptFileName);
-        var logPath = Path.Combine(context.RunDirectory, "notes", $"{logSafeName}.log");
-
-        context.Logger.Info($"Running repo-specific script '{scriptPath}' against '{context.State.SourceCloneDirectory}'.");
+        Console.WriteLine($"Running repo-specific script '{scriptPath}' against '{context.State.SourceCloneDirectory}'.");
         var result = await RunProcessAsync(
             "dotnet",
             ["run", "--file", scriptPath, "--", context.State.SourceCloneDirectory],
             context.State.SourceCloneDirectory).ConfigureAwait(false);
-        await File.WriteAllTextAsync(logPath, result.Output).ConfigureAwait(false);
         EnsureCommandSucceeded(result, $"dotnet run --file {scriptPath}");
 
         return [$"Ran {scriptFileName} successfully."];
@@ -899,12 +890,33 @@ static class RepoMergeScaffold
         using var process = Process.Start(startInfo)
             ?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
 
-        var standardOutputTask = process.StandardOutput.ReadToEndAsync();
-        var standardErrorTask = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync().ConfigureAwait(false);
+        var output = await ReadProcessOutputAsync(process).ConfigureAwait(false);
 
-        var output = (await standardOutputTask.ConfigureAwait(false)) + (await standardErrorTask.ConfigureAwait(false));
         return new ProcessResult(process.ExitCode, output);
+    }
+
+    private static async Task<string> ReadProcessOutputAsync(Process process)
+    {
+        var output = new List<string>();
+
+        Task PumpAsync(StreamReader reader) => Task.Run(async () =>
+        {
+            while (await reader.ReadLineAsync().ConfigureAwait(false) is { } line)
+            {
+                lock (output)
+                    output.Add(line);
+
+                Console.WriteLine(line);
+            }
+        });
+
+        await Task.WhenAll(
+            PumpAsync(process.StandardOutput),
+            PumpAsync(process.StandardError),
+            process.WaitForExitAsync()).ConfigureAwait(false);
+
+        lock (output)
+            return string.Join(Environment.NewLine, output);
     }
 }
 
@@ -935,8 +947,7 @@ readonly record struct StageContext(
     string RepoRoot,
     string RunDirectory,
     string StatePath,
-    MergeRunState State,
-    RunLogger Logger);
+    MergeRunState State);
 
 readonly record struct ProcessResult(int ExitCode, string Output);
 
@@ -989,22 +1000,3 @@ enum StageStatus
     Failed,
 }
 
-sealed class RunLogger
-{
-    public string LogPath { get; }
-
-    public RunLogger(string logPath)
-    {
-        LogPath = logPath;
-    }
-
-    public void Info(string message) => Write("INFO", message);
-    public void Error(string message) => Write("ERROR", message);
-
-    private void Write(string level, string message)
-    {
-        var line = $"[{DateTimeOffset.UtcNow:O}] {level}: {message}";
-        Console.WriteLine(line);
-        File.AppendAllText(LogPath, line + Environment.NewLine);
-    }
-}

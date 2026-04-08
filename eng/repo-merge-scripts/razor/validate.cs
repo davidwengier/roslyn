@@ -29,7 +29,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.Error.WriteLine($"ERROR: {ex.Message}");
+    Console.WriteLine($"ERROR: {ex.Message}");
     return 1;
 }
 
@@ -53,13 +53,22 @@ static async Task RunBuildAsync(string workingDirectory)
     using var process = Process.Start(startInfo)
         ?? throw new InvalidOperationException("Failed to start 'build.cmd'.");
 
-    var standardOutputTask = process.StandardOutput.ReadToEndAsync();
-    var standardErrorTask = process.StandardError.ReadToEndAsync();
-    await process.WaitForExitAsync().ConfigureAwait(false);
-
-    var output = (await standardOutputTask.ConfigureAwait(false)) + (await standardErrorTask.ConfigureAwait(false));
-    Console.WriteLine(output.TrimEnd());
+    await ReadProcessOutputAsync(process).ConfigureAwait(false);
 
     if (process.ExitCode != 0)
         throw new InvalidOperationException($"build.cmd -restore failed with exit code {process.ExitCode}.");
+}
+
+static async Task ReadProcessOutputAsync(Process process)
+{
+    Task PumpAsync(StreamReader reader) => Task.Run(async () =>
+    {
+        while (await reader.ReadLineAsync().ConfigureAwait(false) is { } line)
+            Console.WriteLine(line);
+    });
+
+    await Task.WhenAll(
+        PumpAsync(process.StandardOutput),
+        PumpAsync(process.StandardError),
+        process.WaitForExitAsync()).ConfigureAwait(false);
 }
