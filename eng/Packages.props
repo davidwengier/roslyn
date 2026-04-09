@@ -242,8 +242,8 @@
     <!--
       Testing.
     -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.5.2136" />
-    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5.2136" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.6" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.6" />
     <PackageVersion Include="BasicUndo" Version="0.9.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="$(MicrosoftCodeAnalysisTestingVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="$(MicrosoftCodeAnalysisTestingVersion)" />
