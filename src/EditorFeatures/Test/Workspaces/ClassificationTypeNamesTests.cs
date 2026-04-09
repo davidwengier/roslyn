@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Castle.DynamicProxy.Internal;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Microsoft.VisualStudio.Text.Classification;
@@ -22,7 +22,7 @@ public sealed class ClassificationTypeNamesTests
             .GetFields(BindingFlags.Static | BindingFlags.Public)
             .Select(f => new[] { f.Name, f.GetRawConstantValue() });
 
-    public static IEnumerable<object[]> AllClassificationTypeNames => typeof(ClassificationTypeNames).GetAllFields().Where(
+    public static IEnumerable<object[]> AllClassificationTypeNames => GetAllFields(typeof(ClassificationTypeNames)).Where(
         f => f.GetValue(null) is string value).Select(f => new[] { f.GetValue(null) });
 
     [Theory]
@@ -44,4 +44,15 @@ public sealed class ClassificationTypeNamesTests
     [Fact]
     public void AllTypeNamesContainsNoDuplicates()
         => Assert.Equal(ClassificationTypeNames.AllTypeNames.Distinct(), ClassificationTypeNames.AllTypeNames);
+
+    private static IEnumerable<FieldInfo> GetAllFields(Type type)
+    {
+        for (var currentType = type; currentType is not null; currentType = currentType.BaseType)
+        {
+            foreach (var field in currentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            {
+                yield return field;
+            }
+        }
+    }
 }

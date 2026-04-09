@@ -59,7 +59,6 @@
   <ItemGroup>
     <PackageReference Include="InputSimulatorPlus" />
     <PackageReference Include="Microsoft.VisualStudio.Shell.Styles" />
-    <PackageReference Include="NuGet.SolutionRestoreManager.Interop" />
     <PackageReference Include="System.IO.Hashing" />
     <PackageReference Include="UIAComWrapper" />
     <PackageReference Include="xunit.extensibility.core" />

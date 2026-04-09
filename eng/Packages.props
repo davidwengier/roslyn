@@ -29,17 +29,17 @@
   -->
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
-    <PackageVersion Include="Microsoft.Build" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Framework" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.48" />
+    <PackageVersion Include="Microsoft.Build" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.15.0-preview-25357-08" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true' and '$(TargetFramework)' != 'net472'">
-    <PackageVersion Include="Microsoft.Build" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Framework" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.11.48" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.48" />
+    <PackageVersion Include="Microsoft.Build" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.15.0-preview-25357-08" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.15.0-preview-25357-08" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true' and '$(TargetFramework)' == 'net472'">
@@ -59,7 +59,7 @@
       Visual Studio
     -->
     <PackageVersion Include="Microsoft.VisualStudio.SDK" Version="18.0.2188-preview.1" />
-    <PackageVersion Include="Microsoft.Internal.VisualStudio.Shell.Framework" Version="18.0.1211-preview.1" />
+    <PackageVersion Include="Microsoft.Internal.VisualStudio.Shell.Framework" Version="18.0.2188-preview.1" />
     <PackageVersion Include="Microsoft.ServiceHub.Client" Version="4.6.3200" />
     <PackageVersion Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="18.0.52-preview1" />
     <PackageVersion Include="Microsoft.VisualStudio.Extensibility" Version="18.0.52-preview1" />
@@ -81,8 +81,8 @@
     <PackageVersion Include="Microsoft.VisualStudio.Workspace.VSIntegration" Version="17.9.29-preview-0001" />
     <PackageVersion Include="Microsoft.VisualStudio.Copilot.Roslyn.SemanticSearch" Version="18.0.634-alpha" />
     <PackageVersion Include="VsWebSite.Interop" Version="8.0.50727" />
-    <PackageVersion Include="NuGet.VisualStudio" Version="6.0.0-preview.0.15" />
-    <PackageVersion Include="NuGet.VisualStudio.Contracts" Version="6.0.0-preview.0.15" />
+    <PackageVersion Include="NuGet.VisualStudio" Version="17.9.1" />
+    <PackageVersion Include="NuGet.VisualStudio.Contracts" Version="17.9.1" />
 
     <!-- TODO: Move these to the generate-vssdk-versions.csx-generated versions (https://github.com/dotnet/roslyn/issues/71691) -->
     <PackageVersion Include="Microsoft.VisualStudio.Text.Internal" Version="$(VisualStudioEditorPackagesVersion)" />
@@ -143,7 +143,7 @@
     <!--
       Language Server
     -->
-    <PackageVersion Include="Microsoft.VisualStudio.LanguageServer.Client.Implementation" Version="17.10.72-preview" />
+    <PackageVersion Include="Microsoft.VisualStudio.LanguageServer.Client.Implementation" Version="17.12.1-preview" />
     <PackageVersion Include="NuGet.ProjectModel" Version="6.8.0-rc.112" />
     <PackageVersion Include="Microsoft.TestPlatform.TranslationLayer" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
@@ -206,7 +206,7 @@
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
     <PackageVersion Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
     <PackageVersion Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
@@ -222,7 +222,7 @@
     <PackageVersion Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWebVersion)" />
     <!-- Note: When updating SystemTextJsonVersion ensure that the version is no higher than what is used by MSBuild. -->
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
-    <PackageVersion Include="System.Threading.Channels" Version="8.0.0" />
+    <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
 
     <PackageVersion Include="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
 
@@ -242,8 +242,8 @@
     <!--
       Testing.
     -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.0" />
-    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.5.2136" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5.2136" />
     <PackageVersion Include="BasicUndo" Version="0.9.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="$(MicrosoftCodeAnalysisTestingVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="$(MicrosoftCodeAnalysisTestingVersion)" />
@@ -262,9 +262,8 @@
     <PackageVersion Include="Microsoft.VisualStudio.Diagnostics.PerformanceProvider" Version="17.8.36726" />
     <PackageVersion Include="System.Management" Version="7.0.0" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
-    <PackageVersion Include="NuGet.SolutionRestoreManager.Interop" Version="4.8.0" />
-    <PackageVersion Include="Moq" Version="4.10.1" />
-    <PackageVersion Include="System.CodeDom" Version="8.0.0" />
+    <PackageVersion Include="Moq" Version="4.18.4" />
+    <PackageVersion Include="System.CodeDom" Version="9.0.0" />
     <PackageVersion Include="InputSimulatorPlus" Version="1.0.7" />
     <PackageVersion Include="UIAComWrapper" Version="1.1.0.14" />
     <PackageVersion Include="DiffPlex" Version="1.7.2" />
@@ -304,8 +303,8 @@
     <PackageVersion Include="Microsoft.TeamFoundationServer.Client" Version="19.232.0-preview" />
     <PackageVersion Include="System.Data.SqlClient" Version="$(SystemDataSqlClientVersion)" />
     <!-- fix of vulnerability in 6.0.0 coming via Microsoft.TeamFoundationServer.Client -->
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="8.0.0" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.0" />
     <!--
       vs-extension-testing
     -->
