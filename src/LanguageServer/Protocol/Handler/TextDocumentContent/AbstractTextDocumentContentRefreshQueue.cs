@@ -7,57 +7,93 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Collections;
+using Microsoft.CodeAnalysis.ErrorReporting;
 using Microsoft.CodeAnalysis.Shared.TestHooks;
+using Microsoft.CodeAnalysis.Threading;
 using Roslyn.LanguageServer.Protocol;
 using StreamJsonRpc;
 
 namespace Microsoft.CodeAnalysis.LanguageServer.Handler.TextDocumentContent;
 
 /// <summary>
-/// Abstract refresh queue for text document content providers that use the LSP 3.18
-/// <c>workspace/textDocumentContent</c> mechanism. Subclasses specify which URI schemes they handle
+/// Abstract refresh queue for text document content providers. Subclasses specify which URI scheme they handle
 /// and implement custom change detection logic via <see cref="AbstractRefreshQueue.OnLspSolutionChanged"/>.
-/// <para>
-/// When a refresh is needed, this queue sends a <c>workspace/textDocumentContent/refresh</c> request
-/// for each tracked document whose URI matches one of the registered schemes.
-/// </para>
+/// Refresh notifications are sent for any open document matching the specified scheme.
 /// </summary>
-internal abstract class AbstractTextDocumentContentRefreshQueue(
-    IAsynchronousOperationListenerProvider asynchronousOperationListenerProvider,
-    LspWorkspaceRegistrationService lspWorkspaceRegistrationService,
-    LspWorkspaceManager lspWorkspaceManager,
-    IClientLanguageServerManager notificationManager)
-    : AbstractRefreshQueue(asynchronousOperationListenerProvider, lspWorkspaceRegistrationService, lspWorkspaceManager, notificationManager)
+internal abstract class AbstractTextDocumentContentRefreshQueue :
+    IOnInitialized,
+    ILspService,
+    IDisposable
 {
-    /// <summary>
-    /// Returns the URI schemes this refresh queue handles (e.g. <c>"roslyn-source-generated"</c>).
-    /// </summary>
-    protected abstract ImmutableArray<string> GetSchemes();
+    private readonly IAsynchronousOperationListener _asyncListener;
+    private readonly CancellationTokenSource _disposalTokenSource = new();
+    private readonly LspWorkspaceRegistrationService _lspWorkspaceRegistrationService;
+    private readonly LspWorkspaceManager _lspWorkspaceManager;
+    private readonly IClientLanguageServerManager _notificationManager;
+    private readonly AsyncBatchingWorkQueue<string> _refreshQueue;
 
-    protected sealed override string GetWorkspaceRefreshName()
-        => Methods.WorkspaceTextDocumentContentRefreshName;
-
-    protected sealed override bool? GetRefreshSupport(ClientCapabilities clientCapabilities)
-        => clientCapabilities.Workspace?.TextDocumentContent is not null;
-
-    /// <summary>
-    /// Subclasses should override <see cref="AbstractRefreshQueue.OnLspSolutionChanged"/> to implement
-    /// specific logic for when to enqueue refresh notifications.
-    /// </summary>
-    protected override void OnLspSolutionChanged(object? sender, WorkspaceChangeEventArgs e)
+    public AbstractTextDocumentContentRefreshQueue(
+        IAsynchronousOperationListenerProvider asynchronousOperationListenerProvider,
+        LspWorkspaceRegistrationService lspWorkspaceRegistrationService,
+        LspWorkspaceManager lspWorkspaceManager,
+        IClientLanguageServerManager notificationManager)
     {
+        _lspWorkspaceRegistrationService = lspWorkspaceRegistrationService;
+        _lspWorkspaceManager = lspWorkspaceManager;
+        _notificationManager = notificationManager;
+        _asyncListener = asynchronousOperationListenerProvider.GetListener(FeatureAttribute.SourceGenerators);
+
+        // Batch up workspace notifications so that we only send a notification to refresh source generated files
+        // every 2 seconds - long enough to avoid spamming the client with notifications, but short enough to refresh
+        // the source generated files relatively frequently.
+        _refreshQueue = _refreshQueue = new AsyncBatchingWorkQueue<string>(
+            delay: DelayTimeSpan.Idle,
+            processBatchAsync: RefreshVirtualDocumentsAsync,
+            asyncListener: _asyncListener,
+            _disposalTokenSource.Token);
     }
 
+    public async Task OnInitializedAsync(ClientCapabilities clientCapabilities, RequestContext context, CancellationToken cancellationToken)
+    {
+        if (clientCapabilities.HasVisualStudioLspCapability())
+        {
+            // Virtual text document content is not supported by VS.
+            return;
+        }
+
+        // After we have initialized we can start listening for workspace changes.
+        _lspWorkspaceRegistrationService.LspSolutionChanged += OnLspSolutionChanged;
+    }
+
+    private void OnLspSolutionChanged(object? sender, WorkspaceChangeEventArgs e)
+    {
+        var asyncToken = _asyncListener.BeginAsyncOperation($"{nameof(AbstractTextDocumentContentRefreshQueue)}.{nameof(OnLspSolutionChanged)}");
+        _ = OnLspSolutionChangedAsync(e)
+            .CompletesAsyncOperation(asyncToken)
+            .ReportNonFatalErrorUnlessCancelledAsync(_disposalTokenSource.Token);
+    }
+
+    protected async Task OnLspSolutionChangedAsync(WorkspaceChangeEventArgs e)
+    {
+        var shouldQueue = await ShouldEnqueueRefreshNotificationAsync(e, _disposalTokenSource.Token).ConfigureAwait(false);
+        if (shouldQueue)
+        {
+            _refreshQueue.AddWork(Scheme);
+        }
+    }
+
+    protected abstract Task<bool> ShouldEnqueueRefreshNotificationAsync(WorkspaceChangeEventArgs e, CancellationToken cancellationToken);
+
     /// <summary>
-    /// Sends a <c>workspace/textDocumentContent/refresh</c> request for each tracked document
-    /// whose URI scheme matches one of the schemes returned by <see cref="GetSchemes"/>.
+    /// The scheme that this queue is responsible for.
     /// </summary>
-    protected sealed override async ValueTask ProcessBatchAsync(
-        ImmutableSegmentedList<DocumentUri?> documentUris,
+    protected abstract string Scheme { get; }
+
+    private async ValueTask RefreshVirtualDocumentsAsync(
+        ImmutableSegmentedList<string> schemes,
         CancellationToken cancellationToken)
     {
-        var trackedDocuments = LspWorkspaceManager.GetTrackedLspText();
-        var schemes = GetSchemes();
+        var trackedDocuments = _lspWorkspaceManager.GetTrackedLspText();
 
         foreach (var kvp in trackedDocuments)
         {
@@ -66,8 +102,8 @@ internal abstract class AbstractTextDocumentContentRefreshQueue(
             {
                 try
                 {
-                    await NotificationManager.SendRequestAsync(
-                        GetWorkspaceRefreshName(),
+                    await _notificationManager.SendRequestAsync(
+                        Methods.WorkspaceTextDocumentContentRefreshName,
                         new TextDocumentContentRefreshParams { Uri = uri },
                         cancellationToken).ConfigureAwait(false);
                 }
@@ -78,5 +114,12 @@ internal abstract class AbstractTextDocumentContentRefreshQueue(
                 }
             }
         }
+    }
+
+    public void Dispose()
+    {
+        _lspWorkspaceRegistrationService.LspSolutionChanged -= OnLspSolutionChanged;
+        _disposalTokenSource.Cancel();
+        _disposalTokenSource.Dispose();
     }
 }

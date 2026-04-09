@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -205,6 +206,95 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var secondResult = await testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratorDocumentUri);
         AssertEx.NotNull(secondResult);
         Assert.Equal("// callCount: 1", secondResult.Text);
+    }
+
+    [Theory, CombinatorialData]
+    internal async Task TestTextDocumentContentRefreshSentWhenManuallyRefreshed(bool mutatingLspWorkspace, SourceGeneratorExecutionPreference sourceGeneratorExecution)
+    {
+        var clientCallbackTarget = new TextDocumentContentRefreshClientCallbackTarget();
+        await using var testLspServer = await CreateTestLspServerAsync(
+            string.Empty,
+            mutatingLspWorkspace,
+            new InitializationOptions { ClientTarget = clientCallbackTarget });
+
+        var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
+        configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
+
+        var callCount = 0;
+        var generatorReference = await AddGeneratorAsync(new CallbackGenerator(() => ("hintName.cs", "// callCount: " + callCount++)), testLspServer.TestWorkspace);
+
+        var sourceGeneratorDocumentUri = await OpenSingleSourceGeneratedDocumentAsync(testLspServer);
+        clientCallbackTarget.Clear();
+
+        await testLspServer.RefreshSourceGeneratorsAsync(forceRegeneration: true);
+
+        Assert.Equal([sourceGeneratorDocumentUri], clientCallbackTarget.GetRefreshedUris());
+
+        var refreshedResult = await testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratorDocumentUri);
+        AssertEx.NotNull(refreshedResult);
+        Assert.Equal("// callCount: 1", refreshedResult.Text);
+    }
+
+    [Theory, CombinatorialData]
+    internal async Task TestTextDocumentContentRefreshSentWhenDocumentChanges(bool mutatingLspWorkspace, SourceGeneratorExecutionPreference sourceGeneratorExecution)
+    {
+        var clientCallbackTarget = new TextDocumentContentRefreshClientCallbackTarget();
+        await using var testLspServer = await CreateTestLspServerAsync(
+            string.Empty,
+            mutatingLspWorkspace,
+            new InitializationOptions { ClientTarget = clientCallbackTarget });
+
+        var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
+        configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
+
+        var callCount = 0;
+        var generatorReference = await AddGeneratorAsync(new CallbackGenerator(() => ("hintName.cs", "// callCount: " + callCount++)), testLspServer.TestWorkspace);
+
+        var sourceGeneratorDocumentUri = await OpenSingleSourceGeneratedDocumentAsync(testLspServer);
+        clientCallbackTarget.Clear();
+
+        await testLspServer.TestWorkspace.ChangeDocumentAsync(testLspServer.TestWorkspace.Documents.Single(d => !d.IsSourceGenerated).Id, SourceText.From("new text"));
+        await testLspServer.WaitForSourceGeneratorsAsync();
+
+        if (sourceGeneratorExecution == SourceGeneratorExecutionPreference.Automatic)
+        {
+            Assert.Equal([sourceGeneratorDocumentUri], clientCallbackTarget.GetRefreshedUris());
+        }
+        else
+        {
+            Assert.Empty(clientCallbackTarget.GetRefreshedUris());
+        }
+
+        var refreshedResult = await testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratorDocumentUri);
+        AssertEx.NotNull(refreshedResult);
+        Assert.Equal(
+            sourceGeneratorExecution == SourceGeneratorExecutionPreference.Automatic ? "// callCount: 1" : "// callCount: 0",
+            refreshedResult.Text);
+    }
+
+    [Theory, CombinatorialData]
+    internal async Task TestTextDocumentContentRefreshSentWhenProjectChanges(bool mutatingLspWorkspace, SourceGeneratorExecutionPreference sourceGeneratorExecution)
+    {
+        var clientCallbackTarget = new TextDocumentContentRefreshClientCallbackTarget();
+        await using var testLspServer = await CreateTestLspServerAsync(
+            string.Empty,
+            mutatingLspWorkspace,
+            new InitializationOptions { ClientTarget = clientCallbackTarget });
+
+        var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
+        configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
+
+        var generatorReference = await AddGeneratorAsync(new SingleFileTestGenerator("// Hello, World"), testLspServer.TestWorkspace);
+
+        var sourceGeneratorDocumentUri = await OpenSingleSourceGeneratedDocumentAsync(testLspServer);
+        clientCallbackTarget.Clear();
+
+        var project = testLspServer.TestWorkspace.CurrentSolution.Projects.Single();
+        var updatedProject = project.WithAssemblyName(project.AssemblyName + "2");
+        await testLspServer.TestWorkspace.ChangeProjectAsync(updatedProject.Id, updatedProject.Solution);
+        await testLspServer.WaitForSourceGeneratorsAsync();
+
+        Assert.Equal([sourceGeneratorDocumentUri], clientCallbackTarget.GetRefreshedUris());
     }
 
     [Theory, CombinatorialData]
@@ -414,5 +504,36 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
         await AddGeneratorAsync(new SingleFileTestGenerator(generatedDocumentText), testLspServer.TestWorkspace);
         return testLspServer;
+    }
+
+    private static async Task<LSP.DocumentUri> OpenSingleSourceGeneratedDocumentAsync(TestLspServer testLspServer)
+    {
+        var sourceGeneratedDocuments = await testLspServer.GetCurrentSolution().Projects.Single().GetSourceGeneratedDocumentsAsync();
+        var sourceGeneratedDocumentUri = SourceGeneratedDocumentUri.Create(sourceGeneratedDocuments.Single().Identity);
+
+        var result = await testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratedDocumentUri);
+        AssertEx.NotNull(result);
+
+        await testLspServer.OpenDocumentAsync(sourceGeneratedDocumentUri, result.Text);
+        await testLspServer.WaitForSourceGeneratorsAsync();
+        return sourceGeneratedDocumentUri;
+    }
+
+    private sealed class TextDocumentContentRefreshClientCallbackTarget
+    {
+        private readonly List<LSP.DocumentUri> _refreshedUris = [];
+
+        [JsonRpcMethod(LSP.Methods.WorkspaceTextDocumentContentRefreshName, UseSingleObjectParameterDeserialization = true)]
+        public object? WorkspaceTextDocumentContentRefresh(LSP.TextDocumentContentRefreshParams refreshParams, CancellationToken _)
+        {
+            _refreshedUris.Add(refreshParams.Uri);
+            return null;
+        }
+
+        public void Clear()
+            => _refreshedUris.Clear();
+
+        public LSP.DocumentUri[] GetRefreshedUris()
+            => [.. _refreshedUris];
     }
 }

@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.ErrorReporting;
+using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.LanguageServer.Handler.TextDocumentContent;
-using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Shared.TestHooks;
-using Roslyn.LanguageServer.Protocol;
 
 namespace Microsoft.CodeAnalysis.LanguageServer.Handler.SourceGenerators;
 
@@ -26,19 +22,9 @@ internal sealed class SourceGeneratorRefreshQueue(
     IClientLanguageServerManager notificationManager)
     : AbstractTextDocumentContentRefreshQueue(asynchronousOperationListenerProvider, lspWorkspaceRegistrationService, lspWorkspaceManager, notificationManager)
 {
-    protected override ImmutableArray<string> GetSchemes() => [SourceGeneratedDocumentUri.Scheme];
+    protected override string Scheme => SourceGeneratedDocumentUri.Scheme;
 
-    protected override string GetFeatureAttribute() => FeatureAttribute.SourceGenerators;
-
-    protected override void OnLspSolutionChanged(object? sender, WorkspaceChangeEventArgs e)
-    {
-        var asyncToken = AsyncListener.BeginAsyncOperation($"{nameof(SourceGeneratorRefreshQueue)}.{nameof(OnLspSolutionChanged)}");
-        _ = OnLspSolutionChangedAsync(e)
-            .CompletesAsyncOperation(asyncToken)
-            .ReportNonFatalErrorUnlessCancelledAsync(DisposalToken);
-    }
-
-    private async Task OnLspSolutionChangedAsync(WorkspaceChangeEventArgs e)
+    protected override async Task<bool> ShouldEnqueueRefreshNotificationAsync(WorkspaceChangeEventArgs e, CancellationToken cancellationToken)
     {
         var projectId = e.ProjectId ?? e.DocumentId?.ProjectId;
         if (projectId is not null)
@@ -52,23 +38,29 @@ internal sealed class SourceGeneratorRefreshQueue(
             // If the project has been added/removed, we need to update the generated files.
             if (oldProject is null || newProject is null)
             {
-                EnqueueRefreshNotification(documentUri: null);
-                return;
+                return true;
             }
 
             // Trivial check.  see if the SG version of these projects changed.  If so, we definitely want to update generated files.
             if (e.OldSolution.GetSourceGeneratorExecutionVersion(projectId) !=
                 e.NewSolution.GetSourceGeneratorExecutionVersion(projectId))
             {
-                EnqueueRefreshNotification(documentUri: null);
-                return;
+                return true;
+            }
+
+            var configuration = e.NewSolution.Services.GetRequiredService<IWorkspaceConfigurationService>().Options;
+            // When running in balanced mode, we do not need to refresh generated documents if only a document changed and the execution version did not.
+            if (e.Kind is WorkspaceChangeKind.DocumentChanged &&
+                configuration.SourceGeneratorExecution == SourceGeneratorExecutionPreference.Balanced)
+            {
+                return false;
             }
 
             // More expensive check - see if the dependent versions are different.
-            if (await oldProject.GetDependentVersionAsync(DisposalToken).ConfigureAwait(false) !=
-                await newProject.GetDependentVersionAsync(DisposalToken).ConfigureAwait(false))
+            if (await oldProject.GetDependentVersionAsync(cancellationToken).ConfigureAwait(false) !=
+                await newProject.GetDependentVersionAsync(cancellationToken).ConfigureAwait(false))
             {
-                EnqueueRefreshNotification(documentUri: null);
+                return true;
             }
         }
         else
@@ -76,8 +68,10 @@ internal sealed class SourceGeneratorRefreshQueue(
             // We don't have a specific project change - if this is a solution change we need to queue a refresh anyway.
             if (e.Kind is WorkspaceChangeKind.SolutionChanged or WorkspaceChangeKind.SolutionAdded or WorkspaceChangeKind.SolutionRemoved or WorkspaceChangeKind.SolutionReloaded or WorkspaceChangeKind.SolutionCleared)
             {
-                EnqueueRefreshNotification(documentUri: null);
+                return true;
             }
         }
+
+        return false;
     }
 }
