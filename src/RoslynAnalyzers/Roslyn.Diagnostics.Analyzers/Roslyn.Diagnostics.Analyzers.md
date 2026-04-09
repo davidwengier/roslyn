@@ -81,7 +81,7 @@ Test exports should not be discoverable.
 |Category|RoslynDiagnosticsReliability|
 |Enabled|False|
 |Severity|Warning|
-|CodeFix|True|
+|CodeFix|False|
 ---
 
 ## RS0033: Importing constructor should be marked with 'ObsoleteAttribute'
@@ -105,7 +105,7 @@ Exported parts should be marked with 'ImportingConstructorAttribute'.
 |Category|RoslynDiagnosticsReliability|
 |Enabled|True|
 |Severity|Warning|
-|CodeFix|True|
+|CodeFix|False|
 ---
 
 ## RS0038: Prefer null literal
@@ -117,7 +117,7 @@ Use 'null' instead of 'default' for nullable types.
 |Category|RoslynDiagnosticsMaintainability|
 |Enabled|True|
 |Severity|Warning|
-|CodeFix|True|
+|CodeFix|False|
 ---
 
 ## RS0040: Defaultable types should have defaultable fields
@@ -165,7 +165,7 @@ Avoid the 'Opt' suffix in a nullable-enabled code.
 |Category|RoslynDiagnosticsDesign|
 |Enabled|True|
 |Severity|Warning|
-|CodeFix|True|
+|CodeFix|False|
 ---
 
 ## RS0049: Instance of TemporaryArray\<T>.AsRef() must be a 'using' variable
@@ -201,5 +201,5 @@ Primary constructor parameters should not be implicitly captured. Manually assig
 |Category|RoslynDiagnosticsPerformance|
 |Enabled|False|
 |Severity|Warning|
-|CodeFix|True|
+|CodeFix|False|
 ---
