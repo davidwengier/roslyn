@@ -80,6 +80,24 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
     }
 
     [Theory, CombinatorialData]
+    public async Task SetsTextDocumentContentCapabilitiesWhenSupported(bool mutatingLspWorkspace)
+    {
+        var clientCapabilities = new LSP.ClientCapabilities
+        {
+            Workspace = new LSP.WorkspaceClientCapabilities
+            {
+                TextDocumentContent = new LSP.TextDocumentContentClientCapabilities(),
+            },
+        };
+
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, clientCapabilities);
+
+        var textDocumentContentCapabilities = testLspServer.GetServerCapabilities().Workspace?.TextDocumentContent;
+        AssertEx.NotNull(textDocumentContentCapabilities);
+        Assert.Contains(SourceGeneratedDocumentUri.Scheme, textDocumentContentCapabilities.Schemes);
+    }
+
+    [Theory, CombinatorialData]
     public async Task RequestOnSourceGeneratedDocument(bool mutatingLspWorkspace)
     {
         await using var testLspServer = await CreateTestLspServerWithGeneratorAsync(mutatingLspWorkspace, "class A { }");
@@ -224,6 +242,7 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         var generatorReference = await AddGeneratorAsync(new CallbackGenerator(() => ("hintName.cs", "// callCount: " + callCount++)), testLspServer.TestWorkspace);
 
         var sourceGeneratorDocumentUri = await OpenSingleSourceGeneratedDocumentAsync(testLspServer);
+        var result = await testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratorDocumentUri);
         clientCallbackTarget.Clear();
 
         await testLspServer.RefreshSourceGeneratorsAsync(forceRegeneration: true);

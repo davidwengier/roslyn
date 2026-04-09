@@ -146,9 +146,19 @@ internal sealed class DefaultCapabilitiesProvider : ICapabilitiesProvider
             };
         }
 
-        WorkspaceFileOperationsServerCapabilities? fileOperations = null;
-        if (clientCapabilities.Workspace?.FileOperations?.WillRename ?? false)
+        capabilities.Workspace = new WorkspaceServerCapabilities
         {
+            FileOperations = GetWorkspaceFileOperationsCapabilities(),
+            TextDocumentContent = GetTextDocumentContentCapabilities(),
+        };
+
+        return capabilities;
+
+        WorkspaceFileOperationsServerCapabilities? GetWorkspaceFileOperationsCapabilities()
+        {
+            if (clientCapabilities.Workspace?.FileOperations is null)
+                return null;
+
             // Register for file rename notifications based on the registered rename listeners.
             using var _ = PooledObjects.ArrayBuilder<FileOperationFilter>.GetInstance(out var filters);
             foreach (var listener in _renameListeners)
@@ -159,43 +169,34 @@ internal sealed class DefaultCapabilitiesProvider : ICapabilitiesProvider
                 });
             }
 
-            if (filters.Count > 0)
-            {
-                fileOperations = new WorkspaceFileOperationsServerCapabilities()
-                {
-                    WillRename = new FileOperationRegistrationOptions()
-                    {
-                        Filters = filters.ToArray()
-                    }
-                };
-            }
-        }
+            if (filters.Count == 0)
+                return null;
 
-        TextDocumentContentOptions? textDocumentContent = null;
-        if (clientCapabilities.Workspace?.TextDocumentContent is not null)
-        {
-            // Client supports textDocumentContent - register the schemes from all providers so the client
-            // can use workspace/textDocumentContent to retrieve virtual document contents.
-            var schemes = lspServices.GetRequiredServices<ITextDocumentContentProvider>().Select(p => p.Scheme).ToArray();
-            if (schemes.Length > 0)
+            return new WorkspaceFileOperationsServerCapabilities()
             {
-                textDocumentContent = new TextDocumentContentOptions
+                WillRename = new FileOperationRegistrationOptions()
                 {
-                    Schemes = schemes
-                };
-            }
-        }
-
-        if (fileOperations is not null || textDocumentContent is not null)
-        {
-            capabilities.Workspace = new WorkspaceServerCapabilities
-            {
-                FileOperations = fileOperations,
-                TextDocumentContent = textDocumentContent,
+                    Filters = filters.ToArray()
+                }
             };
         }
 
-        return capabilities;
+        TextDocumentContentOptions? GetTextDocumentContentCapabilities()
+        {
+            if (clientCapabilities.Workspace?.TextDocumentContent is null)
+                return null;
+
+            // Client supports textDocumentContent - register the schemes from all providers so the client
+            // can use workspace/textDocumentContent to retrieve virtual document contents.
+            var schemes = lspServices.GetRequiredServices<ITextDocumentContentProvider>().Select(p => p.Scheme).ToArray();
+            if (schemes.Length == 0)
+                return null;
+
+            return new TextDocumentContentOptions
+            {
+                Schemes = schemes
+            };
+        }
     }
 
     private static VSInternalServerCapabilities GetVSServerCapabilities()
