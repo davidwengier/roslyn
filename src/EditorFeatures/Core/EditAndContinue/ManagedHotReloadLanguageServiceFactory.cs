@@ -55,7 +55,7 @@ internal sealed class ManagedHotReloadLanguageServiceFactory : IEditAndContinueS
     /// </summary>
     /// <param name="serviceBroker">The service broker used to acquire debugger and logger services.</param>
     /// <param name="solutionSnapshotProvider">
-    /// Host-specific solution snapshot provider. In VS this is <see cref="EditorHostSolutionProvider"/> (from MEF)
+    /// Host-specific solution snapshot provider. In VS this is EditorHostSolutionProvider (from MEF)
     /// </param>
     public ManagedHotReloadLanguageService Create(
         IServiceBroker serviceBroker,
