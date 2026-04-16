@@ -214,7 +214,7 @@ internal abstract class LanguageServerProjectLoader
     protected abstract Task<RemoteProjectLoadResult?> TryLoadProjectInMSBuildHostAsync(
         BuildHostProcessManager buildHostProcessManager, string projectPath, CancellationToken cancellationToken);
 
-    /// <returns>True if the project needs a NuGet restore, false otherwise.</returns>
+    /// <returns>The project file path that needs a NuGet restore, if any.</returns>
     private async Task<string?> ReloadProjectAsync(ProjectToLoad projectToLoad, ToastErrorReporter toastErrorReporter, BuildHostProcessManager buildHostProcessManager, CancellationToken cancellationToken)
     {
         BuildHostProcessKind? preferredBuildHostKindThatWeDidNotGet = null;
