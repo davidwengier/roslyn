@@ -295,6 +295,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
             {
                 ProjectFileInfos = projectInfos,
                 DiagnosticLogItems = [],
+                // This points to the Canonical.csproj, which always exists on disk and can be restored regardless of SDK.
                 ProjectRestorePath = projectInfos.FirstOrDefault()?.FilePath,
                 ProjectFactory = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory,
                 IsFileBasedProgram = false,

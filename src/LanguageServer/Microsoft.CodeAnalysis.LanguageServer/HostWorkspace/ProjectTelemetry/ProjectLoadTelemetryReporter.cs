@@ -157,10 +157,10 @@ internal sealed class ProjectLoadTelemetryReporter(ILoggerFactory loggerFactory,
         if (!File.Exists(projectPath))
         {
             // We have no file path at all and so cannot compute a contents hash, just return a sentinel value.
-            return "NONE";
+            return "MISSING";
         }
 
-        var content = await File.ReadAllTextAsync(projectToLoad.Path);
+        var content = await File.ReadAllTextAsync(projectPath);
         // This should exactly match O# to ensure we get the same hashes.
         return VsReferenceHashingAlgorithm.HashInput($"Filename: {Path.GetFileName(projectToLoad.Path)}\n{content}");
     }

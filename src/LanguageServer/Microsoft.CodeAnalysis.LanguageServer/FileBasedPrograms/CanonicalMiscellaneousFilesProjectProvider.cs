@@ -64,6 +64,8 @@ internal sealed class CanonicalMiscellaneousFilesProjectProvider : IDisposable
 
         Directory.CreateDirectory(_tempDirectory);
         var virtualProjectPath = Path.Combine(_tempDirectory, "Canonical.csproj");
+
+        // Write the csproj to disk so we can run restore on it later (required for SDKs prior to .NET 10)
         File.WriteAllText(virtualProjectPath, virtualProjectXml);
 
         await using var buildHostProcessManager = new BuildHostProcessManager(
