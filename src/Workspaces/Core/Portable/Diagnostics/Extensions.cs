@@ -380,14 +380,11 @@ internal static partial class Extensions
             {
                 var frozenGeneratedDocuments = solution.CompilationState.FrozenSourceGeneratedDocumentStates.States.Values
                     .Where(state => project.Id == state.Identity.DocumentId.ProjectId);
-                if (frozenGeneratedDocuments.Any())
+                // Add the checksums for the frozen documents
+                foreach (var frozenState in frozenGeneratedDocuments)
                 {
-                    // Add the checksums for the frozen documents
-                    foreach (var frozenState in frozenGeneratedDocuments)
-                    {
-                        var frozenDocumentChecksum = await frozenState.GetChecksumAsync(cancellationToken).ConfigureAwait(false);
-                        tempChecksumArray.Add(frozenDocumentChecksum);
-                    }
+                    var frozenDocumentChecksum = await frozenState.GetChecksumAsync(cancellationToken).ConfigureAwait(false);
+                    tempChecksumArray.Add(frozenDocumentChecksum);
                 }
             }
 

@@ -26,18 +26,18 @@ internal sealed class TextDocumentContentHandler() : ILspServiceDocumentRequestH
 
     public async Task<TextDocumentContentResult> HandleRequestAsync(TextDocumentContentParams request, RequestContext context, CancellationToken cancellationToken)
     {
-        Contract.ThrowIfNull(context.Document, $"{request.Uri} was not found in any workspace, cannot provide content");
+        Contract.ThrowIfNull(context.TextDocument, $"{request.Uri} was not found in any workspace, cannot provide content");
 
         var scheme = request.Uri.ParsedUri?.Scheme;
         if (scheme is not null)
         {
             var provider = context.GetRequiredServices<ITextDocumentContentProvider>().Single(p => p.Scheme == scheme);
 
-            var contentText = await provider.GetTextAsync(context.Document, cancellationToken).ConfigureAwait(false);
+            var contentText = await provider.GetTextAsync(context.TextDocument, cancellationToken).ConfigureAwait(false);
             return new TextDocumentContentResult { Text = contentText };
         }
 
-        var text = await context.Document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var text = await context.TextDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
         return new TextDocumentContentResult
         {
             Text = text.ToString()

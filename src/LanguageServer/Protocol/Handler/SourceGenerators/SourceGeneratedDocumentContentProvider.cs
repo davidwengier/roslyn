@@ -22,7 +22,7 @@ internal sealed class SourceGeneratedDocumentContentProvider() : ITextDocumentCo
 {
     public string Scheme => SourceGeneratedDocumentUri.Scheme;
 
-    public async Task<string> GetTextAsync(Document document, CancellationToken cancellationToken)
+    public async Task<string> GetTextAsync(TextDocument document, CancellationToken cancellationToken)
     {
         Contract.ThrowIfFalse(document is SourceGeneratedDocument);
 

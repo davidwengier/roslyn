@@ -22,5 +22,5 @@ internal interface ITextDocumentContentProvider : ILspService
     /// <summary>
     /// Returns the text content for the given <paramref name="document"/>.
     /// </summary>
-    Task<string> GetTextAsync(Document document, CancellationToken cancellationToken);
+    Task<string> GetTextAsync(TextDocument document, CancellationToken cancellationToken);
 }

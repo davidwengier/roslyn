@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Text;
+using Roslyn.LanguageServer.Protocol;
 using Roslyn.Test.Utilities;
 using Roslyn.Test.Utilities.TestGenerators;
 using StreamJsonRpc;
@@ -20,6 +23,14 @@ namespace Microsoft.CodeAnalysis.LanguageServer.UnitTests.Workspaces;
 
 public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHelper) : AbstractLanguageServerProtocolTests(testOutputHelper)
 {
+    private static readonly ClientCapabilities CapabilitiesWithRefresh = new()
+    {
+        Workspace = new WorkspaceClientCapabilities
+        {
+            TextDocumentContent = new TextDocumentContentClientCapabilities()
+        }
+    };
+
     [Theory, CombinatorialData]
     public async Task ReturnsTextForSourceGeneratedDocument(bool mutatingLspWorkspace)
     {
@@ -233,7 +244,11 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await using var testLspServer = await CreateTestLspServerAsync(
             string.Empty,
             mutatingLspWorkspace,
-            new InitializationOptions { ClientTarget = clientCallbackTarget });
+            new InitializationOptions
+            {
+                ClientTarget = clientCallbackTarget,
+                ClientCapabilities = CapabilitiesWithRefresh
+            });
 
         var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
         configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
@@ -261,7 +276,11 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await using var testLspServer = await CreateTestLspServerAsync(
             string.Empty,
             mutatingLspWorkspace,
-            new InitializationOptions { ClientTarget = clientCallbackTarget });
+            new InitializationOptions
+            {
+                ClientTarget = clientCallbackTarget,
+                ClientCapabilities = CapabilitiesWithRefresh
+            });
 
         var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
         configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
@@ -298,7 +317,11 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
         await using var testLspServer = await CreateTestLspServerAsync(
             string.Empty,
             mutatingLspWorkspace,
-            new InitializationOptions { ClientTarget = clientCallbackTarget });
+            new InitializationOptions
+            {
+                ClientTarget = clientCallbackTarget,
+                ClientCapabilities = CapabilitiesWithRefresh
+            });
 
         var configService = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<TestWorkspaceConfigurationService>();
         configService.Options = new WorkspaceConfigurationOptions(SourceGeneratorExecution: sourceGeneratorExecution);
@@ -410,7 +433,7 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
     }
 
     [Theory, CombinatorialData]
-    public async Task TestReturnsEmptyForRemovedClosedGeneratedFile(bool mutatingLspWorkspace)
+    public async Task TestReturnsErrorForRemovedClosedGeneratedFile(bool mutatingLspWorkspace)
     {
         var generatorText = "// Hello, World";
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace);
@@ -430,7 +453,7 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
 
         var exception = await Assert.ThrowsAsync<StreamJsonRpc.RemoteInvocationException>(
             () => testLspServer.GetSourceGeneratedDocumentTextAsync(sourceGeneratorDocumentUri));
-        Assert.NotNull(exception);
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
     }
 
     [Theory, CombinatorialData]
@@ -540,17 +563,17 @@ public sealed class SourceGeneratedDocumentTests(ITestOutputHelper? testOutputHe
 
     private sealed class TextDocumentContentRefreshClientCallbackTarget
     {
-        private readonly List<LSP.DocumentUri> _refreshedUris = [];
+        private ConcurrentQueue<LSP.DocumentUri> _refreshedUris = new();
 
         [JsonRpcMethod(LSP.Methods.WorkspaceTextDocumentContentRefreshName, UseSingleObjectParameterDeserialization = true)]
         public object? WorkspaceTextDocumentContentRefresh(LSP.TextDocumentContentRefreshParams refreshParams, CancellationToken _)
         {
-            _refreshedUris.Add(refreshParams.Uri);
+            _refreshedUris.Enqueue(refreshParams.Uri);
             return null;
         }
 
         public void Clear()
-            => _refreshedUris.Clear();
+            => _refreshedUris = new ConcurrentQueue<LSP.DocumentUri>();
 
         public LSP.DocumentUri[] GetRefreshedUris()
             => [.. _refreshedUris];

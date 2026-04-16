@@ -30,8 +30,7 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
     private readonly LspWorkspaceRegistrationService _lspWorkspaceRegistrationService;
     private readonly LspWorkspaceManager _lspWorkspaceManager;
     private readonly IClientLanguageServerManager _notificationManager;
-    private readonly AsyncBatchingWorkQueue<string> _refreshQueue;
-
+    private readonly AsyncBatchingWorkQueue _refreshQueue;
     public AbstractTextDocumentContentRefreshQueue(
         IAsynchronousOperationListenerProvider asynchronousOperationListenerProvider,
         LspWorkspaceRegistrationService lspWorkspaceRegistrationService,
@@ -41,12 +40,12 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
         _lspWorkspaceRegistrationService = lspWorkspaceRegistrationService;
         _lspWorkspaceManager = lspWorkspaceManager;
         _notificationManager = notificationManager;
-        _asyncListener = asynchronousOperationListenerProvider.GetListener(FeatureAttribute.SourceGenerators);
+        _asyncListener = asynchronousOperationListenerProvider.GetListener(FeatureAttribute.Workspace);
 
-        // Batch up workspace notifications so that we only send a notification to refresh source generated files
+        // Batch up workspace notifications so that we only send a notification to refresh virtual files
         // every 2 seconds - long enough to avoid spamming the client with notifications, but short enough to refresh
-        // the source generated files relatively frequently.
-        _refreshQueue = _refreshQueue = new AsyncBatchingWorkQueue<string>(
+        // the virtual files relatively frequently.
+        _refreshQueue = _refreshQueue = new AsyncBatchingWorkQueue(
             delay: DelayTimeSpan.Idle,
             processBatchAsync: RefreshVirtualDocumentsAsync,
             asyncListener: _asyncListener,
@@ -55,9 +54,8 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
 
     public async Task OnInitializedAsync(ClientCapabilities clientCapabilities, RequestContext context, CancellationToken cancellationToken)
     {
-        if (clientCapabilities.HasVisualStudioLspCapability())
+        if (clientCapabilities.Workspace?.TextDocumentContent == null)
         {
-            // Virtual text document content is not supported by VS.
             return;
         }
 
@@ -78,7 +76,7 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
         var shouldQueue = await ShouldEnqueueRefreshNotificationAsync(e, _disposalTokenSource.Token).ConfigureAwait(false);
         if (shouldQueue)
         {
-            _refreshQueue.AddWork(Scheme);
+            _refreshQueue.AddWork();
         }
     }
 
@@ -90,7 +88,6 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
     protected abstract string Scheme { get; }
 
     private async ValueTask RefreshVirtualDocumentsAsync(
-        ImmutableSegmentedList<string> schemes,
         CancellationToken cancellationToken)
     {
         var trackedDocuments = _lspWorkspaceManager.GetTrackedLspText();
@@ -98,7 +95,7 @@ internal abstract class AbstractTextDocumentContentRefreshQueue :
         foreach (var kvp in trackedDocuments)
         {
             var uri = kvp.Key;
-            if (uri.ParsedUri is { } parsedUri && schemes.Contains(parsedUri.Scheme))
+            if (uri.ParsedUri is { } parsedUri && parsedUri.Scheme == Scheme)
             {
                 try
                 {
