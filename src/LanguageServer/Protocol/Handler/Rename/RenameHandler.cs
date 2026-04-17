@@ -31,6 +31,9 @@ internal sealed class RenameHandler() : ILspServiceDocumentRequestHandler<LSP.Re
         => GetRenameEditAsync(context.GetRequiredDocument(), ProtocolConversions.PositionToLinePosition(request.Position), request.NewName, cancellationToken);
 
     internal static async Task<WorkspaceEdit?> GetRenameEditAsync(Document document, LinePosition linePosition, string newName, CancellationToken cancellationToken)
+        => await GetRenameEditAsync(document, linePosition, newName, allowRenamesInRazorSourceGeneratedDocuments: false, cancellationToken).ConfigureAwait(false);
+
+    internal static async Task<WorkspaceEdit?> GetRenameEditAsync(Document document, LinePosition linePosition, string newName, bool allowRenamesInRazorSourceGeneratedDocuments, CancellationToken cancellationToken)
     {
         var oldSolution = document.Project.Solution;
         var position = await document.GetPositionFromLinePositionAsync(linePosition, cancellationToken).ConfigureAwait(false);
@@ -50,6 +53,7 @@ internal sealed class RenameHandler() : ILspServiceDocumentRequestHandler<LSP.Re
             oldSolution,
             symbolicRenameInfo.Symbol,
             options,
+            allowRenamesInRazorSourceGeneratedDocuments,
             cancellationToken).ConfigureAwait(false);
 
         var renameReplacementInfo = await renameLocationSet.ResolveConflictsAsync(
