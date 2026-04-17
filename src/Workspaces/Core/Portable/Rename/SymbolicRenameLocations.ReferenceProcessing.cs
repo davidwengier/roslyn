@@ -447,7 +447,14 @@ internal sealed partial class SymbolicRenameLocations
             Document document,
             bool allowRenamesInRazorSourceGeneratedDocuments)
         {
-            return allowRenamesInRazorSourceGeneratedDocuments && document.IsRazorSourceGeneratedDocument();
+            if (allowRenamesInRazorSourceGeneratedDocuments && document.IsRazorSourceGeneratedDocument())
+            {
+                return true;
+            }
+
+            return document is SourceGeneratedDocument sourceGeneratedDocument
+                && document.Project.Solution.Services.GetService<ISourceGeneratedDocumentSpanMappingService>() is { } mappingService
+                && mappingService.CanMapSpans(sourceGeneratedDocument);
         }
     }
 }
