@@ -238,8 +238,8 @@ internal sealed partial class SymbolicRenameLocations
                 // have cascaded to this symbol from our original source symbol, and the generator will update this file
                 // based on the renamed symbol. Razor source generated documents are an exception - cohost rename can opt
                 // into including them even when the span mapping service is unavailable.
-                if (document is SourceGeneratedDocument &&
-                    !ShouldIncludeSourceGeneratedDocument(document, allowRenamesInRazorSourceGeneratedDocuments))
+                if (document is SourceGeneratedDocument sourceGeneratedDocument &&
+                    !ShouldIncludeSourceGeneratedDocument(sourceGeneratedDocument, allowRenamesInRazorSourceGeneratedDocuments))
                 {
                     return;
                 }
@@ -254,8 +254,8 @@ internal sealed partial class SymbolicRenameLocations
             // We won't try to update references in source generated files; we'll assume the generator will rerun
             // and produce an updated document with the new name. Razor source generated documents are an exception -
             // cohost rename can opt into including them even when the span mapping service is unavailable.
-            if (location.Document is SourceGeneratedDocument &&
-                !ShouldIncludeSourceGeneratedDocument(location.Document, allowRenamesInRazorSourceGeneratedDocuments))
+            if (location.Document is SourceGeneratedDocument sourceGeneratedDocument &&
+                !ShouldIncludeSourceGeneratedDocument(sourceGeneratedDocument, allowRenamesInRazorSourceGeneratedDocuments))
             {
                 return [];
             }
@@ -444,17 +444,19 @@ internal sealed partial class SymbolicRenameLocations
         }
 
         private static bool ShouldIncludeSourceGeneratedDocument(
-            Document document,
+            SourceGeneratedDocument document,
             bool allowRenamesInRazorSourceGeneratedDocuments)
         {
+            // Razor will call us with this flag set at times where the mapping service isn't available, because
+            // it will do the mapping once it has the results from us. If the rename didn't originate from Razor,
+            // then we only want to include the document if the mapping service is available.
             if (allowRenamesInRazorSourceGeneratedDocuments && document.IsRazorSourceGeneratedDocument())
             {
                 return true;
             }
 
-            return document is SourceGeneratedDocument sourceGeneratedDocument
-                && document.Project.Solution.Services.GetService<ISourceGeneratedDocumentSpanMappingService>() is { } mappingService
-                && mappingService.CanMapSpans(sourceGeneratedDocument);
+            return document.Project.Solution.Services.GetService<ISourceGeneratedDocumentSpanMappingService>() is { } mappingService
+                && mappingService.CanMapSpans(document);
         }
     }
 }
