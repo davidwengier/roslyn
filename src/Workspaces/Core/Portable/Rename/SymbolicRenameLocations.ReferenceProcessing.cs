@@ -238,8 +238,13 @@ internal sealed partial class SymbolicRenameLocations
                 // have cascaded to this symbol from our original source symbol, and the generator will update this file
                 // based on the renamed symbol. Razor source generated documents are an exception - cohost rename can opt
                 // into including them even when the span mapping service is unavailable.
-                if (ShouldIncludeSourceGeneratedDocument(solution, document, allowRenamesInRazorSourceGeneratedDocuments))
-                    results.Add(new RenameLocation(location, document.Id, isRenamableAccessor: isRenamableAccessor));
+                if (document is SourceGeneratedDocument &&
+                    !ShouldIncludeSourceGeneratedDocument(document, allowRenamesInRazorSourceGeneratedDocuments))
+                {
+                    return;
+                }
+
+                results.Add(new RenameLocation(location, document.Id, isRenamableAccessor: isRenamableAccessor));
             }
         }
 
@@ -249,8 +254,11 @@ internal sealed partial class SymbolicRenameLocations
             // We won't try to update references in source generated files; we'll assume the generator will rerun
             // and produce an updated document with the new name. Razor source generated documents are an exception -
             // cohost rename can opt into including them even when the span mapping service is unavailable.
-            if (!ShouldIncludeSourceGeneratedDocument(solution, location.Document, allowRenamesInRazorSourceGeneratedDocuments))
+            if (location.Document is SourceGeneratedDocument &&
+                !ShouldIncludeSourceGeneratedDocument(location.Document, allowRenamesInRazorSourceGeneratedDocuments))
+            {
                 return [];
+            }
 
             var shouldIncludeSymbol = await ShouldIncludeSymbolAsync(referencedSymbol, originalSymbol, solution, true, cancellationToken).ConfigureAwait(false);
             if (!shouldIncludeSymbol)
@@ -435,25 +443,11 @@ internal sealed partial class SymbolicRenameLocations
             }
         }
 
-        private static bool CanMapSourceGeneratedDocument(Solution solution, Document document)
-        {
-            return document is SourceGeneratedDocument sourceGeneratedDocument
-                && solution.Services.GetService<ISourceGeneratedDocumentSpanMappingService>() is { } mappingService
-                && mappingService.CanMapSpans(sourceGeneratedDocument);
-        }
-
         private static bool ShouldIncludeSourceGeneratedDocument(
-            Solution solution,
             Document document,
             bool allowRenamesInRazorSourceGeneratedDocuments)
         {
-            if (document is not SourceGeneratedDocument)
-            {
-                return true;
-            }
-
-            return (allowRenamesInRazorSourceGeneratedDocuments && document.IsRazorSourceGeneratedDocument())
-                || CanMapSourceGeneratedDocument(solution, document);
+            return allowRenamesInRazorSourceGeneratedDocuments && document.IsRazorSourceGeneratedDocument();
         }
     }
 }

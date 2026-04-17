@@ -28,10 +28,12 @@ internal sealed class RenameHandler() : ILspServiceDocumentRequestHandler<LSP.Re
     public TextDocumentIdentifier GetTextDocumentIdentifier(RenameParams request) => request.TextDocument;
 
     public Task<WorkspaceEdit?> HandleRequestAsync(RenameParams request, RequestContext context, CancellationToken cancellationToken)
-        => GetRenameEditAsync(context.GetRequiredDocument(), ProtocolConversions.PositionToLinePosition(request.Position), request.NewName, cancellationToken);
-
-    internal static async Task<WorkspaceEdit?> GetRenameEditAsync(Document document, LinePosition linePosition, string newName, CancellationToken cancellationToken)
-        => await GetRenameEditAsync(document, linePosition, newName, allowRenamesInRazorSourceGeneratedDocuments: false, cancellationToken).ConfigureAwait(false);
+        => GetRenameEditAsync(
+            context.GetRequiredDocument(),
+            ProtocolConversions.PositionToLinePosition(request.Position),
+            request.NewName,
+            allowRenamesInRazorSourceGeneratedDocuments: false,
+            cancellationToken);
 
     internal static async Task<WorkspaceEdit?> GetRenameEditAsync(Document document, LinePosition linePosition, string newName, bool allowRenamesInRazorSourceGeneratedDocuments, CancellationToken cancellationToken)
     {
