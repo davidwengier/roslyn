@@ -92,7 +92,12 @@
     "roslyn-language-server.osx-x64": "vs-impl",
     "roslyn-language-server.win-arm64": "vs-impl",
     "roslyn-language-server.win-x64": "vs-impl",
-    "Text.Analyzers": "arcade"
+    "Text.Analyzers": "arcade",
+    "Microsoft.VisualStudioCode.RazorExtension": "vs-impl",
+    "Microsoft.CodeAnalysis.Razor.Compiler": "arcade",
+    "Microsoft.Net.Compilers.Razor.Toolset": "arcade",
+    "Microsoft.VisualStudio.RazorExtension": "arcade",
+    "RazorDeployment": "arcade"
   },
   "branchInfo": {
     "nugetKind": [
