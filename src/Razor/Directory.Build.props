@@ -11,7 +11,7 @@
     <AddPublicApiAnalyzers Condition="'$(IsTestProject)' == 'true' OR '$(IsUnitTestProject)' == 'true' OR '$(IsIntegrationTestProject)' == 'true'">false</AddPublicApiAnalyzers>
 
     <!-- PROTOTYPE(sonic): Uncomment to make the error list your todo list -->
-    <!--<DefineConstants>$(DefineConstants);SONICDEV</DefineConstants>-->
+    <DefineConstants>$(DefineConstants);SONICDEV</DefineConstants>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
