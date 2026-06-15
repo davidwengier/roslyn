@@ -60,7 +60,7 @@ public class CohostSemanticTokensFullEndpointTest(ITestOutputHelper testOutputHe
 
     private protected override Task<SemanticTokens?> GetSemanticTokensAsync(TextDocument document, CancellationToken cancellationToken)
     {
-        var endpoint = new CohostSemanticTokensFullEndpoint(IncompatibleProjectService, RemoteServiceInvoker, NoOpTelemetryReporter.Instance);
+        var endpoint = new CohostSemanticTokensFullEndpoint(IncompatibleProjectService, RemoteServiceInvoker, NoOpTelemetryReporter.Instance, LoggerFactory);
 
         return endpoint.GetTestAccessor().HandleRequestAsync(document, cancellationToken);
     }

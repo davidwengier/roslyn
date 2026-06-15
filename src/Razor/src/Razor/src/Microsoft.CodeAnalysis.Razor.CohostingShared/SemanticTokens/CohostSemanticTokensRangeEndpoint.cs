@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Razor.CohostingShared;
 using Microsoft.CodeAnalysis.Razor.Cohost;
+using Microsoft.CodeAnalysis.Razor.Logging;
 using Microsoft.CodeAnalysis.Razor.Remote;
 using Microsoft.CodeAnalysis.Razor.Telemetry;
 using Microsoft.CodeAnalysis.Text;
@@ -22,8 +23,9 @@ namespace Microsoft.VisualStudio.Razor.LanguageClient.Cohost;
 internal sealed class CohostSemanticTokensRangeEndpoint(
     IIncompatibleProjectService incompatibleProjectService,
     IRemoteServiceInvoker remoteServiceInvoker,
-    ITelemetryReporter telemetryReporter)
-    : CohostSemanticTokensEndpointBase<SemanticTokensRangeParams>(incompatibleProjectService, remoteServiceInvoker, telemetryReporter)
+    ITelemetryReporter telemetryReporter,
+    ILoggerFactory loggerFactory)
+    : CohostSemanticTokensEndpointBase<SemanticTokensRangeParams>(incompatibleProjectService, remoteServiceInvoker, telemetryReporter, loggerFactory)
 {
     protected override string LspMethodName => Methods.TextDocumentSemanticTokensRangeName;
 

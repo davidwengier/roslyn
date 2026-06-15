@@ -77,7 +77,14 @@ internal sealed partial class RazorSemanticTokensInfoService(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var textSpan = codeDocument.Source.Text.GetTextSpan(span);
+        var sourceText = codeDocument.Source.Text;
+        if (!TryGetTextSpan(sourceText, span, out var textSpan))
+        {
+            var logInfo = await CreateOOPRequestInfoAsync(documentContext, codeDocument, span, correlationId, cancellationToken).ConfigureAwait(false);
+            _logger.LogDebug($"Razor semantic tokens request contained an invalid Razor span.{Environment.NewLine}{logInfo}");
+            return null;
+        }
+
         using var _ = s_pool.GetPooledObject(out var combinedSemanticRanges);
 
         SemanticTokensVisitor.AddSemanticRanges(combinedSemanticRanges, codeDocument, textSpan, _semanticTokensLegendService, colorBackground);
@@ -87,7 +94,7 @@ internal sealed partial class RazorSemanticTokensInfoService(
 
         try
         {
-            successfullyRetrievedCSharpSemanticRanges = await AddCSharpSemanticRangesAsync(combinedSemanticRanges, documentContext, codeDocument, span, colorBackground, correlationId, cancellationToken).ConfigureAwait(false);
+            successfullyRetrievedCSharpSemanticRanges = await AddCSharpSemanticRangesAsync(combinedSemanticRanges, documentContext, codeDocument, span, textSpan, colorBackground, correlationId, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -115,11 +122,76 @@ internal sealed partial class RazorSemanticTokensInfoService(
         return ConvertSemanticRangesToSemanticTokensData(combinedSemanticRanges, codeDocument);
     }
 
+    private static bool TryGetTextSpan(SourceText sourceText, LinePositionSpan span, out TextSpan textSpan)
+    {
+        if (!TryGetAbsoluteIndex(sourceText, span.Start, out var start) ||
+            !TryGetAbsoluteIndex(sourceText, span.End, out var end) ||
+            end < start)
+        {
+            textSpan = default;
+            return false;
+        }
+
+        textSpan = TextSpan.FromBounds(start, end);
+        return true;
+    }
+
+    private static async Task<string> CreateOOPRequestInfoAsync(RemoteDocumentContext documentContext, RazorCodeDocument codeDocument, LinePositionSpan span, Guid correlationId, CancellationToken cancellationToken)
+    {
+        var codeDocumentSourceText = codeDocument.Source.Text;
+        var currentDocumentSourceText = await documentContext.GetSourceTextAsync(cancellationToken).ConfigureAwait(false);
+        var currentDocumentTextVersion = await documentContext.Snapshot.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
+        var currentDocumentChecksum = await documentContext.TextDocument.State.GetChecksumAsync(cancellationToken).ConfigureAwait(false);
+        var currentDocumentWorkspaceVersion = documentContext.TextDocument.Project.Solution.SolutionStateContentVersion;
+        var codeDocumentMatchesCurrentDocument = codeDocumentSourceText.ContentEquals(currentDocumentSourceText);
+
+        return $"""
+            OOP document URI: {documentContext.Uri}
+            OOP correlation ID: {correlationId}
+            OOP requested span: {span}
+            OOP TextDocument file path: {documentContext.TextDocument.FilePath}
+            OOP TextDocument id: {documentContext.TextDocument.Id}
+            OOP TextDocument checksum: {currentDocumentChecksum}
+            OOP TextDocument text version: {currentDocumentTextVersion}
+            OOP workspace version: {currentDocumentWorkspaceVersion}
+            OOP current source length: {currentDocumentSourceText.Length}
+            OOP current source line count: {currentDocumentSourceText.Lines.Count}
+            OOP current source span validity: {GetSpanDiagnostic(currentDocumentSourceText, span)}
+            OOP RazorCodeDocument.Source.Text matches current TextDocument: {codeDocumentMatchesCurrentDocument}
+            OOP RazorCodeDocument source length: {codeDocumentSourceText.Length}
+            OOP RazorCodeDocument source line count: {codeDocumentSourceText.Lines.Count}
+            OOP RazorCodeDocument source span validity: {GetSpanDiagnostic(codeDocumentSourceText, span)}
+            """;
+    }
+
+    private static string GetSpanDiagnostic(SourceText sourceText, LinePositionSpan span)
+    {
+        if (TryGetTextSpan(sourceText, span, out var textSpan))
+        {
+            return $"valid, text span {textSpan}";
+        }
+
+        return "invalid";
+    }
+
+    private static bool TryGetAbsoluteIndex(SourceText sourceText, LinePosition position, out int absoluteIndex)
+    {
+        if (position.Line < 0 ||
+            position.Character < 0)
+        {
+            absoluteIndex = 0;
+            return false;
+        }
+
+        return sourceText.TryGetAbsoluteIndex(position, out absoluteIndex);
+    }
+
     private async Task<bool> AddCSharpSemanticRangesAsync(
         List<SemanticRange> ranges,
         RemoteDocumentContext documentContext,
         RazorCodeDocument codeDocument,
         LinePositionSpan razorSpan,
+        TextSpan razorTextSpan,
         bool colorBackground,
         Guid correlationId,
         CancellationToken cancellationToken)
@@ -127,7 +199,7 @@ internal sealed partial class RazorSemanticTokensInfoService(
         var generatedDocument = codeDocument.GetRequiredCSharpDocument();
 
         // Get a list of precise ranges for the C# code embedded in the Razor document.
-        if (!TryGetSortedCSharpRanges(codeDocument, razorSpan, out var csharpRanges))
+        if (!TryGetSortedCSharpRanges(codeDocument, razorTextSpan, out var csharpRanges))
         {
             // There's no C# in the range.
             return true;
@@ -222,12 +294,10 @@ internal sealed partial class RazorSemanticTokensInfoService(
     }
 
     // Internal for testing only
-    internal static bool TryGetSortedCSharpRanges(RazorCodeDocument codeDocument, LinePositionSpan razorRange, out ImmutableArray<LinePositionSpan> ranges)
+    internal static bool TryGetSortedCSharpRanges(RazorCodeDocument codeDocument, TextSpan textSpan, out ImmutableArray<LinePositionSpan> ranges)
     {
         using var _ = ArrayBuilderPool<LinePositionSpan>.GetPooledObject(out var csharpRanges);
         var csharpSourceText = codeDocument.GetCSharpSourceText();
-        var sourceText = codeDocument.Source.Text;
-        var textSpan = sourceText.GetTextSpan(razorRange);
         var csharpDoc = codeDocument.GetRequiredCSharpDocument();
 
         // We want to find the min and max C# source mapping that corresponds with our Razor range.
