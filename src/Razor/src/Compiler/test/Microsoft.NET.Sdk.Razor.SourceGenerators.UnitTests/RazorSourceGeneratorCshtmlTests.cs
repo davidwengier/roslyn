@@ -459,6 +459,86 @@ public sealed class RazorSourceGeneratorCshtmlTests : RazorSourceGeneratorTestsB
         Assert.Equal(originalComponentSource.ToString(), updatedComponentSource.ToString());
     }
 
+    [Fact, WorkItem("https://devdiv.visualstudio.com/DevDiv/_workitems/edit/3050748")]
+    public async Task IncrementalUpdate_WhenInheritsTypeChanges_DoesNotDuplicateComponentTypeInferenceMethods()
+    {
+        var project = CreateTestProject(
+            additionalSources: new()
+            {
+                ["Components/Page.razor"] = """
+                    @using MyApp
+                    <GenericComponent Value="42" />
+                    """,
+                ["Pages/Index.cshtml"] = """
+                    @inherits PageBaseAlias
+                    <h1>Hello World</h1>
+                    """,
+            },
+            sources: new()
+            {
+                ["GenericComponent.cs"] = """
+                    using Microsoft.AspNetCore.Components;
+
+                    namespace MyApp;
+
+                    public sealed class GenericComponent<T> : ComponentBase
+                    {
+                        [Parameter]
+                        public T Value { get; set; } = default!;
+                    }
+                    """,
+                ["PageBases.cs"] = """
+                    global using PageBaseAlias = MyApp.FirstPageBase;
+
+                    using Microsoft.AspNetCore.Mvc.Razor;
+
+                    namespace MyApp;
+
+                    public abstract class FirstPageBase : RazorPage
+                    {
+                    }
+
+                    public abstract class SecondPageBase : RazorPage
+                    {
+                    }
+                    """,
+            });
+
+        var compilation = await project.GetCompilationAsync();
+        var driver = await GetDriverAsync(project);
+
+        var result = RunGenerator(compilation!, ref driver);
+        var originalComponentSource = result.ImplGeneratedSources()
+            .Single(s => s.HintName.EndsWith("Page_razor.g.cs", StringComparison.Ordinal))
+            .SourceText;
+
+        var pageBasesDocument = project.Documents.Single(d => d.Name == "PageBases.cs");
+        project = pageBasesDocument.WithText(SourceText.From("""
+                global using PageBaseAlias = MyApp.SecondPageBase;
+
+                using Microsoft.AspNetCore.Mvc.Razor;
+
+                namespace MyApp;
+
+                public abstract class FirstPageBase : RazorPage
+                {
+                }
+
+                public abstract class SecondPageBase : RazorPage
+                {
+                }
+                """, Encoding.UTF8)).Project;
+
+        compilation = await project.GetCompilationAsync();
+        result = RunGenerator(compilation!, ref driver);
+
+        var updatedComponentSource = result.ImplGeneratedSources()
+            .Single(s => s.HintName.EndsWith("Page_razor.g.cs", StringComparison.Ordinal))
+            .SourceText;
+
+        Assert.Equal(originalComponentSource.ToString(), updatedComponentSource.ToString());
+    }
+
     [Fact, WorkItem("https://github.com/dotnet/razor/issues/8429")]
     public async Task Utf8HtmlLiterals_NoInheritsDirective_UsesStringLiterals()
     {
