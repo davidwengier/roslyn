@@ -386,6 +386,79 @@ public sealed class RazorSourceGeneratorCshtmlTests : RazorSourceGeneratorTestsB
         Assert.DoesNotContain("u8)", result.GeneratedSources[0].SourceText.ToString());
     }
 
+    [Fact, WorkItem("https://devdiv.visualstudio.com/DevDiv/_workitems/edit/3050748")]
+    public async Task Utf8HtmlLiterals_IncrementalUpdate_DoesNotDuplicateComponentTypeInferenceMethods()
+    {
+        var project = CreateTestProject(
+            additionalSources: new()
+            {
+                ["Components/Page.razor"] = """
+                    @using MyApp
+                    <GenericComponent Value="42" />
+                    """,
+                ["Pages/Index.cshtml"] = """
+                    @inherits MyApp.MyPageBase
+                    <h1>Hello World</h1>
+                    """,
+            },
+            sources: new()
+            {
+                ["GenericComponent.cs"] = """
+                    using Microsoft.AspNetCore.Components;
+
+                    namespace MyApp;
+
+                    public sealed class GenericComponent<T> : ComponentBase
+                    {
+                        [Parameter]
+                        public T Value { get; set; } = default!;
+                    }
+                    """,
+                ["MyPageBase.cs"] = """
+                    using Microsoft.AspNetCore.Mvc.Razor;
+
+                    namespace MyApp;
+
+                    public abstract class MyPageBase : RazorPage
+                    {
+                    }
+                    """,
+            });
+
+        var compilation = await project.GetCompilationAsync();
+        var driver = await GetDriverAsync(project);
+
+        var result = RunGenerator(compilation!, ref driver);
+        var originalComponentSource = result.ImplGeneratedSources()
+            .Single(s => s.HintName.EndsWith("Page_razor.g.cs", StringComparison.Ordinal))
+            .SourceText;
+
+        var baseClassDocument = project.Documents.Single(d => d.Name == "MyPageBase.cs");
+        project = baseClassDocument.WithText(SourceText.From("""
+                using System;
+                using Microsoft.AspNetCore.Mvc.Razor;
+
+                namespace MyApp;
+
+                public abstract class MyPageBase : RazorPage
+                {
+                    public void WriteLiteral(ReadOnlySpan<byte> utf8HtmlLiteral)
+                    {
+                        WriteLiteral(System.Text.Encoding.UTF8.GetString(utf8HtmlLiteral));
+                    }
+                }
+                """, Encoding.UTF8)).Project;
+
+        compilation = await project.GetCompilationAsync();
+        result = RunGenerator(compilation!, ref driver);
+
+        var updatedComponentSource = result.ImplGeneratedSources()
+            .Single(s => s.HintName.EndsWith("Page_razor.g.cs", StringComparison.Ordinal))
+            .SourceText;
+
+        Assert.Equal(originalComponentSource.ToString(), updatedComponentSource.ToString());
+    }
+
     [Fact, WorkItem("https://github.com/dotnet/razor/issues/8429")]
     public async Task Utf8HtmlLiterals_NoInheritsDirective_UsesStringLiterals()
     {
