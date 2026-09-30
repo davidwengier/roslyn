@@ -364,6 +364,9 @@ Each lazy wraps a single non-cancelable computation task. Individual requests ca
 canceling or restarting the shared analyzer initialization. Successful results remain cached; if initialization
 faults or is unexpectedly canceled, the matching cache entry is removed so a later request can retry with a fresh task.
 
+Cache-entry factories and cleanup continuations are created in a cache-miss helper, so cached lookups do not allocate
+per-analyzer closures.
+
 **Deprioritized analyzers:**
 - Register `SymbolStartAnalysisContext`/`SymbolEndAnalysisContext` actions
 - Register `SemanticModelAction`s
