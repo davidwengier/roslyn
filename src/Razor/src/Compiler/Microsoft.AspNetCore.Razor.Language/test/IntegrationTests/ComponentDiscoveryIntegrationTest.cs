@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.AspNetCore.Razor.Language.Components;
 using Microsoft.AspNetCore.Razor.Language.Syntax;
+using Roslyn.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Razor.Language.IntegrationTests;
@@ -333,6 +334,87 @@ namespace Test.AnotherNamespace
         Assert.Empty(result.RazorDiagnostics);
         Assert.Contains("OpenComponent<global::Components.Library.Subsequent>", result.Code);
         CompileToAssembly(result);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/86373")]
+    public void ComponentDiscovery_GenericComponentInheritance_DoesNotReportDuplicateParameters()
+    {
+        AdditionalRazorItems.Add(CreateProjectItem("Foo.razor", """
+            @using Microsoft.AspNetCore.Components
+            @typeparam T1
+            @typeparam T2
+
+            @code
+            {
+                [Parameter]
+                public T1 First { get; set; }
+
+                [Parameter]
+                public T2 Second { get; set; }
+            }
+            """, RazorFileKind.Component));
+
+        AdditionalSyntaxTrees.Add(Parse("""
+            namespace Test
+            {
+                public class Foo<T> : Foo<T, T>
+                {
+                }
+            }
+            """));
+
+        var result = CompileToCSharp(cshtmlRelativePath: "Home.razor", cshtmlContent: """
+            @using Test
+
+            <Foo T="int" First="42" Second="600" />
+            """);
+
+        Assert.Empty(result.RazorDiagnostics);
+        CompileToAssembly(result);
+    }
+
+    [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/86373")]
+    public void ComponentDiscovery_GenericComponentInheritance_ReportsParametersFromUnselectedCandidate()
+    {
+        AdditionalRazorItems.Add(CreateProjectItem("Foo.razor", """
+            @using Microsoft.AspNetCore.Components
+            @typeparam T1
+            @typeparam T2
+
+            @code
+            {
+                [Parameter]
+                public T1 First { get; set; }
+
+                [Parameter]
+                public T2 Second { get; set; }
+            }
+            """, RazorFileKind.Component));
+
+        AdditionalSyntaxTrees.Add(Parse("""
+            using Microsoft.AspNetCore.Components;
+
+            namespace Test
+            {
+                public class Foo<T> : Foo<T, T>
+                {
+                    [Parameter]
+                    public string Extra { get; set; }
+                }
+            }
+            """));
+
+        var result = CompileToCSharp(
+            cshtmlRelativePath: "Home.razor",
+            cshtmlContent: """
+                @using Test
+
+                <Foo T1="int" T2="string" First="42" Second="600" Extra="extra" />
+                """,
+            configuration: Configuration with { RazorWarningLevel = 11 });
+
+        var diagnostic = Assert.Single(result.RazorDiagnostics);
+        Assert.Same(ComponentDiagnosticFactory.UnknownComponentParameter.Id, diagnostic.Id);
     }
 
     [Fact]
